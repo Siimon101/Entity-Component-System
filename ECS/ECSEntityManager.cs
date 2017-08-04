@@ -94,7 +94,6 @@ namespace Simon.ECS
             return (m_destroyedEntities.IndexOf(entityID) > -1);
         }
 
-
         public static void DestroyEntity(Entity entity, float delay = 0)
         {
             if (m_destroyedEntities.IndexOf(entity.GetID()) > -1)
@@ -103,7 +102,7 @@ namespace Simon.ECS
             }
 
 
-            GameEvent evnt = new GameEvent(GameEvents.EVENT_ENTITY_DESTROY, entity.GetID(), 105);
+            GameEvent evnt = new GameEvent(GameEventID.EVENT_ENTITY_DESTROY, entity.GetID(), 105);
             EventDispatcher.s_Instance.SendEvent(evnt, delay);
             m_destroyedEntities.Add(entity.GetID());
         }

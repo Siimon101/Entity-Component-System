@@ -7,12 +7,12 @@ namespace Simon.ECS.Systems
     {
         public SEntityDestroy()
         {
-            EventDispatcher.s_Instance.RegisterObserver(this, GameEvents.EVENT_ENTITY_DESTROY);
+            EventDispatcher.s_Instance.RegisterObserver(this, GameEventID.EVENT_ENTITY_DESTROY);
         }
 
         public override void ReceiveEvent(GameEvent evt)
         {
-            if (evt.GetEventType() == GameEvents.EVENT_ENTITY_DESTROY)
+            if (evt.GetEventType() == GameEventID.EVENT_ENTITY_DESTROY)
             {
                 Entity entity = ECSEntityManager.GetEntity(evt.GetRecipient());
                 entity.DestroyEntity();

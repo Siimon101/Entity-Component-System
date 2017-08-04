@@ -2,8 +2,6 @@
 using Simon.Event_System;
 using Simon.ECS.Manager;
 using UnityEngine;
-using IdleSiege.Actors.Entities.Combat.Components;
-using IdleSiege.Actors.Units.Components;
 
 namespace Simon.ECS
 {
@@ -27,8 +25,8 @@ namespace Simon.ECS
             m_gameObject = gameObject;
             Init();
             ECSContainerManager.Add(this);
-            EventDispatcher.s_Instance.SendEvent(new GameEvent(GameEvents.EVENT_ENTITY_SPAWNED, m_id));
-            EventDispatcher.s_Instance.SendEvent(new GameEvent(GameEvents.EVENT_ENTITY_SPAWNED_LATE, m_id), .1f);
+            EventDispatcher.s_Instance.SendEvent(new GameEvent(GameEventID.EVENT_ENTITY_SPAWNED, m_id));
+            EventDispatcher.s_Instance.SendEvent(new GameEvent(GameEventID.EVENT_ENTITY_SPAWNED_LATE, m_id), .1f);
         }
 
         public void DestroyEntity()
@@ -164,21 +162,21 @@ namespace Simon.ECS
 
         private void OnComponentAdded()
         {
-            GameEvent evt = new GameEvent(GameEvents.EVENT_ENTITY_COMPONENT_ADDED, GetID());
+            GameEvent evt = new GameEvent(GameEventID.EVENT_ENTITY_COMPONENT_ADDED, GetID());
             EventDispatcher.s_Instance.SendEvent(evt);
             OnComponentChanged();
         }
 
         private void OnComponentRemoved()
         {
-            GameEvent evt = new GameEvent(GameEvents.EVENT_ENTITY_COMPONENT_REMOVED, GetID());
+            GameEvent evt = new GameEvent(GameEventID.EVENT_ENTITY_COMPONENT_REMOVED, GetID());
             EventDispatcher.s_Instance.SendEvent(evt);
             OnComponentChanged();
         }
 
         private void OnComponentChanged()
         {
-            GameEvent evt = new GameEvent(GameEvents.EVENT_ENTITY_COMPONENT_CHANGED, GetID());
+            GameEvent evt = new GameEvent(GameEventID.EVENT_ENTITY_COMPONENT_CHANGED, GetID());
             EventDispatcher.s_Instance.SendEvent(evt);
         }
 
