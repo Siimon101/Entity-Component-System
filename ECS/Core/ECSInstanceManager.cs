@@ -49,6 +49,11 @@ namespace ECS.Core
             return CreateComponent<T>(e.QueryID);
         }
 
+        internal void AddComponent(Entity e, ECSComponent component)
+        {
+            m_componentManager.AddComponent(e.QueryID, component);
+        }
+
         public T CreateComponent<T>(int entityID) where T : ECSComponent
         {
             return m_componentManager.CreateComponent<T>(entityID);

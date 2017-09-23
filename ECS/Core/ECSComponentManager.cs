@@ -27,9 +27,14 @@ namespace ECS.Core
         internal T CreateComponent<T>(int entityID) where T : ECSComponent
         {
             T component = Activator.CreateInstance<T>();
+            AddComponent(entityID, component);
+            return component;
+        }
+
+        internal void AddComponent(int entityID, ECSComponent component)
+        {
             component.QueryID = entityID;
             AddComponent(component);
-            return component;
         }
 
         internal void DestroyComponent(ECSComponent component)
@@ -49,14 +54,13 @@ namespace ECS.Core
 
         internal ECSComponent GetComponent(int entityID, Type type)
         {
-            return GetComponentContainer(GetComponentID(type)).GetComponent(entityID);            
+            return GetComponentContainer(GetComponentID(type)).GetComponent(entityID);
         }
 
         internal bool HasComponent(int entityID, Type type)
         {
             return GetComponentContainer(type).HasComponent(entityID);
         }
-
 
         private ECSComponentContainer GetComponentContainer<T>()
         {
@@ -80,7 +84,7 @@ namespace ECS.Core
                 m_componentContainers.Add(componentID, new ECSComponentContainer(componentID));
             }
 
-            return m_componentContainers[componentID];;
+            return m_componentContainers[componentID]; ;
         }
 
 
@@ -133,6 +137,7 @@ namespace ECS.Core
             if (m_components.ContainsKey(entityID) == false)
             {
                 ECSDebug.LogError("Entity " + entityID + " does not have component of type " + m_containerType);
+                return null;
             }
 
             return m_components[entityID];
