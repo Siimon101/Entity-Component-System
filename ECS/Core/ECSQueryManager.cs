@@ -52,8 +52,6 @@ namespace ECS.Core
 
             foreach (System.Type type in args)
             {
-                string componentID = m_componentManager.GetComponentID(type);
-
                 for (int i = entitiesReturned.Count - 1; i >= 0; i--)
                 {
                     entity = entitiesReturned[i];
