@@ -1,47 +1,53 @@
-﻿
-namespace Simon.ECS
+using UnityEngine;
+
+namespace ECS
 {
     public static class ECSDebug
     {
-        public static DebugMode m_debugMode = DebugMode.Warnings;
 
-        public enum DebugMode
+        private enum LogType
         {
-            Off,
-            Any,
-            Errors,
-            Warnings
+            NONE,
+            ERRORS,
+            WARNINGS,
+            ALL
         }
 
-        public static void Log(string s)
+        private static LogType m_currentLogType = LogType.ALL;
+
+        private const string DEBUG_PREFIX = "[ECSDEBUG] ";
+
+        public static void LogError(string log)
         {
-            if (m_debugMode != DebugMode.Any)
+            if (m_currentLogType < LogType.ERRORS)
             {
                 return;
             }
 
-            UnityEngine.Debug.Log(s);
+            Debug.LogError(DEBUG_PREFIX + log);
         }
 
-        public static void LogError(string s)
+        public static void LogWarning(string log)
         {
-            if (m_debugMode == DebugMode.Off)
+            if (m_currentLogType < LogType.WARNINGS)
             {
                 return;
             }
 
-            UnityEngine.Debug.LogError(s);
+            Debug.LogWarning(DEBUG_PREFIX + log);
         }
 
-        public static void LogWarning(string s)
+        
+        public static void Log(string log)
         {
-            if (m_debugMode == DebugMode.Warnings)
+            if (m_currentLogType < LogType.ALL)
             {
                 return;
             }
 
-            UnityEngine.Debug.LogWarning(s);
+            Debug.Log(DEBUG_PREFIX + log);
         }
+
 
     }
 }
