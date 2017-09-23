@@ -1,3 +1,5 @@
+using System;
+
 namespace ECS.Core
 {
     public class ECSInstanceManager
@@ -30,6 +32,11 @@ namespace ECS.Core
         public T CreateSystem<T>() where T : ECSSystem
         {
             return m_systemManager.CreateSystem<T>(m_queryManager);
+        }
+
+        internal void DestroySystem<T>() where T : ECSSystem
+        {
+            m_systemManager.DestroySystem<T>();
         }
 
         public void DestroySystem(ECSSystem system)
