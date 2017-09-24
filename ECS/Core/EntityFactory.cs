@@ -89,6 +89,10 @@ namespace ECS.Core
 
             }
 
+
+            List<JSONObject> toAdd = new List<JSONObject>();
+
+            bool hasValue = false;
             // Add/Overwrite missing values
             foreach (JSONObject componentA in newComponents.Children)
             {
@@ -101,12 +105,19 @@ namespace ECS.Core
 
                         foreach (string valueA in valueKeysA)
                         {
+                            hasValue = false;
                             foreach (string valueB in valueKeysB)
                             {
                                 if (valueA == valueB)
                                 {
                                     componentB.GetDictionary()[valueB] = componentA.GetDictionary()[valueA];
+                                    hasValue = true;
                                 }
+                            }
+
+                            if (hasValue == false)
+                            {
+                                componentB.AsObject.GetDictionary().Add(valueA, componentA.GetDictionary()[valueA]);
                             }
                         }
                     }
@@ -137,7 +148,7 @@ namespace ECS.Core
                     }
                 }
 
-                if(component == null)
+                if (component == null)
                 {
                     ECSDebug.LogError("Tried to create component " + componentName + " but it failed, does it even exist?");
                     return;
