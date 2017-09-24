@@ -1,8 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using ECS.Core;
-using Game.Components.Common;
 using SimpleJSON;
 using UnityEngine;
 
@@ -38,14 +37,97 @@ namespace ECS.Core
                 return null;
             }
 
-            JSONNode data = null;
-            for (int i = 0; i < archeTypeData["Components"].Count; i++)
+            JSONNode mergedJson = null;
+
+            if (HasBaseArchetype(archeTypeData))
             {
+                string baseArchetypeID = archeTypeData["base_archetype"];
+                JSONNode baseArchetypeData = m_jsonParsedData[baseArchetypeID];
+
+                if (baseArchetypeData == null)
+                {
+                    ECSDebug.LogError("Base Archetype not found or not supported -> " + archeTypeData["base_archetype"].ToString());
+                    return null;
+                }
+
+                mergedJson = MergeJSONData(archetypeID, baseArchetypeID);
+            }
+
+            archeTypeData["Components"] = mergedJson;
+
+            CreateComponents(e, archeTypeData);
+
+            return e;
+        }
+
+        private JSONNode MergeJSONData(string archetypeID, string baseID)
+        {
+            JSONNode baseComponents = JSON.Parse(m_jsonData)[baseID]["Components"];
+            JSONNode newComponents = JSON.Parse(m_jsonData)[archetypeID]["Components"];
+
+            JSONNode returnedComponentData = baseComponents;
+
+            //Add missing components
+            bool foundComponent = false;
+
+            foreach (JSONObject componentA in newComponents.Children)
+            {
+                foundComponent = false;
+
+                foreach (JSONObject componentB in baseComponents.Children)
+                {
+                    if (componentA["ComponentName"] == componentB["ComponentName"])
+                    {
+                        foundComponent = true;
+                    }
+                }
+
+                if (foundComponent == false)
+                {
+                    returnedComponentData.Add(componentA);
+                }
+
+            }
+
+            // Add/Overwrite missing values
+            foreach (JSONObject componentA in newComponents.Children)
+            {
+                foreach (JSONObject componentB in baseComponents.Children)
+                {
+                    if (componentA["ComponentName"] == componentB["ComponentName"])
+                    {
+                        ArrayList valueKeysA = componentA.AsObject.GetKeys();
+                        ArrayList valueKeysB = componentB.AsObject.GetKeys();
+
+                        foreach (string valueA in valueKeysA)
+                        {
+                            foreach (string valueB in valueKeysB)
+                            {
+                                if (valueA == valueB)
+                                {
+                                    componentB.GetDictionary()[valueB] = componentA.GetDictionary()[valueA];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return returnedComponentData;
+        }
+
+        private bool HasBaseArchetype(JSONNode archeTypeData)
+        {
+            return archeTypeData["base_archetype"] != null;
+        }
+
+        private void CreateComponents(Entity e, JSONNode archeTypeData)
+        {
+            foreach (var data in archeTypeData["Components"].Children)
+            {
+                string componentName = data["ComponentName"];
+
                 ECSComponent component = null;
-
-                data = archeTypeData["Components"][i];
-
-                string componentName = data["component_name"];
 
                 foreach (System.Type type in m_cachedComponentReferences)
                 {
@@ -55,10 +137,15 @@ namespace ECS.Core
                     }
                 }
 
+                if(component == null)
+                {
+                    ECSDebug.LogError("Tried to create component " + componentName + " but it failed, does it even exist?");
+                    return;
+                }
+
                 m_ecsManager.InstanceManager.AddComponent(e, component);
             }
 
-            return e;
         }
 
         private static Type[] GetTypesByName(string className)

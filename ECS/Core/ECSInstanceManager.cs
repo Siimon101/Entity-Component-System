@@ -44,6 +44,11 @@ namespace ECS.Core
             m_systemManager.DestroySystem(system);
         }
 
+        public T CreateComponent<T>() where T : ECSComponent
+        {
+            return CreateComponent<T>();
+        }
+
         public T CreateComponent<T>(Entity e) where T : ECSComponent
         {
             return CreateComponent<T>(e.QueryID);
@@ -51,7 +56,14 @@ namespace ECS.Core
 
         internal void AddComponent(Entity e, ECSComponent component)
         {
-            m_componentManager.AddComponent(e.QueryID, component);
+            m_componentManager.AddComponent(e.QueryID, component, false);
+        }
+
+        
+        internal void AddComponent(Entity e, ECSComponent component, bool replace)
+        {
+            throw new NotImplementedException();
+            m_componentManager.AddComponent(e.QueryID, component, replace);
         }
 
         public T CreateComponent<T>(int entityID) where T : ECSComponent

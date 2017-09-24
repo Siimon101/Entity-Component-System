@@ -56,7 +56,7 @@ namespace ECS.Core
                 {
                     entity = entitiesReturned[i];
 
-                    if (m_componentManager.HasComponent(entity.QueryID, type) == false)
+                    if (m_componentManager.HasComponent(entity.QueryID, m_componentManager.GetComponentID(type)) == false)
                     {
                         entitiesReturned.RemoveAt(i);
                     }

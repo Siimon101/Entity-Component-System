@@ -25,13 +25,13 @@ namespace ECS.Core
             return m_queryManager.GetComponent<T>(entity);
         }
 
+        public virtual void OnEnable() { }
+        public virtual void OnDisable() { }
         public virtual void FixedUpdate() { }
         public virtual void LateUpdate() { }
         public virtual void Update() { }
 
-        internal virtual void Destroy()
-        {
-            throw new NotImplementedException();
-        }
+        public virtual void Initialize() { }
+        public virtual void Shutdown() { }
     }
 }

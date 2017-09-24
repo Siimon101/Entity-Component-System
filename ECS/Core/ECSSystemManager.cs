@@ -62,7 +62,7 @@ namespace ECS.Core
             return typeof(T).ToString();
         }
 
-        internal T CreateSystem<T>(ECSQueryManager queryManager) where T : ECSSystem
+        internal T CreateSystem<T>(ECSQueryManager queryManager, bool autoInitialize = true) where T : ECSSystem
         {
             T system = Activator.CreateInstance<T>();
             system.QueryManager = queryManager;
@@ -71,7 +71,20 @@ namespace ECS.Core
 
             m_systemsCreated++;
             AddSystem(system);
+
+            if(autoInitialize)
+            {
+                InitializeSystem(system);
+            }
+
             return system;
+        }
+
+
+        internal void InitializeSystem(ECSSystem system)
+        {
+            system.Initialize();            
+            system.OnEnable();
         }
 
 
@@ -84,7 +97,7 @@ namespace ECS.Core
 
             RemoveSystem(system);
             m_systemsCreated--;
-            system.Destroy();
+            system.Shutdown();
         }
 
         internal void DestroySystem<T>() where T : ECSSystem
