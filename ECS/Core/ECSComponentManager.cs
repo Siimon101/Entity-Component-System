@@ -7,65 +7,36 @@ namespace ECS.Core
     public class ECSComponentManager
     {
 
-        private Dictionary<string, ECSComponentContainer> m_componentContainers;
+        private Dictionary<Type, ECSComponentContainer> m_componentContainers;
 
         public ECSComponentManager()
         {
-            m_componentContainers = new Dictionary<string, ECSComponentContainer>();
+            m_componentContainers = new Dictionary<Type, ECSComponentContainer>();
         }
 
-        internal void AddComponent(int entityID, ECSComponent component, bool replace)
+
+        private void RemoveComponent<T>(int entityID)
         {
+            GetComponentContainer<T>().RemoveComponent(entityID);
+        }
 
-            if (HasComponent(entityID, GetComponentID(component)) == true)
-            {
-                if (replace)
-                {
-                    OverwriteComponent(entityID, component);
-                    return;
-                }
-
-                ECSDebug.LogWarning("Tried adding component to entity " + entityID + " but component with same type exists (" + GetComponentID(component) + ")");
-                return;
-            }
-
+        internal void AddComponent(int entityID, ECSComponent component)
+        {
             GetComponentContainer(component).AddComponent(entityID, component);
         }
 
-        internal void OverwriteComponent(int entityID, ECSComponent component)
-        {
-            if (HasComponent(entityID, GetComponentID(component)) == false)
-            {
-                ECSDebug.LogError("Tried to overwrite component but entity " + entityID + " does not have component " + GetComponentID(component));
-                return;
-            }
-
-            throw new NotImplementedException();
-        }
-
-        private void RemoveComponent(ECSComponent component)
-        {
-            GetComponentContainer(component).RemoveComponent(component);
-        }
-
-
         internal T CreateComponent<T>() where T : ECSComponent
         {
-            T component = Activator.CreateInstance<T>();
-            GetComponentContainer(component).PoolComponent(component);
-            return component;
+            ECSComponentContainer container = GetComponentContainer<T>();
+            ECSComponent component = container.GetComponent();
+            return (T)component;
         }
 
         internal T CreateComponent<T>(int entityID) where T : ECSComponent
         {
             T component = CreateComponent<T>();
-            AddComponent(entityID, component, false);
-            return component;
-        }
-
-        internal void DestroyComponent(ECSComponent component)
-        {
-            RemoveComponent(component);
+            GetComponentContainer<T>().AddComponent(entityID, component);
+            return (T)component;
         }
 
         internal void DestroyComponent<T>(int entityID)
@@ -78,19 +49,15 @@ namespace ECS.Core
             return GetComponentContainer<T>().GetComponent(entityID);
         }
 
-        internal ECSComponent GetComponent(int entityID, string componentID)
-        {
-            return GetComponentContainer(componentID).GetComponent(entityID);
-        }
 
-        internal bool HasComponent(int entityID, string componentID)
+        internal bool HasComponent(int entityID, Type componentID)
         {
             return GetComponentContainer(componentID).HasComponent(entityID);
         }
 
         private ECSComponentContainer GetComponentContainer<T>()
         {
-            return GetComponentContainer(GetComponentID<T>());
+            return GetComponentContainer(GetComponentID(typeof(T)));
         }
 
         private ECSComponentContainer GetComponentContainer(ECSComponent component)
@@ -98,7 +65,7 @@ namespace ECS.Core
             return GetComponentContainer(GetComponentID(component));
         }
 
-        private ECSComponentContainer GetComponentContainer(string componentID)
+        private ECSComponentContainer GetComponentContainer(Type componentID)
         {
             if (m_componentContainers.ContainsKey(componentID) == false)
             {
@@ -109,54 +76,67 @@ namespace ECS.Core
         }
 
 
-        internal string GetComponentID(ECSComponent component)
+        internal Type GetComponentID(ECSComponent component)
         {
             return GetComponentID(component.GetType());
         }
 
-        internal string GetComponentID<T>()
+        internal Type GetComponentID(Type type)
         {
-            return GetComponentID(typeof(T));
-        }
-
-        internal string GetComponentID(Type type)
-        {
-            return type.ToString();
+            return type;
         }
 
     }
 
     internal class ECSComponentContainer
     {
+        private List<ECSComponent> m_componentPool;
         private Dictionary<int, ECSComponent> m_components;
 
-        private string m_containerType;
-        public ECSComponentContainer(string type)
+        private Type m_containerType;
+        public ECSComponentContainer(Type type)
         {
+            m_componentPool = new List<ECSComponent>();
             m_components = new Dictionary<int, ECSComponent>();
             m_containerType = type;
         }
 
         internal void AddComponent(int entityID, ECSComponent component)
         {
-            component.QueryID = entityID;
-            m_components.Add(component.QueryID, component);
+            m_components.Add(entityID, component);
         }
 
         internal void PoolComponent(ECSComponent eCSComponent)
         {
-            ECSDebug.LogWarning("Tried to pool " + eCSComponent.GetType() + " but pooling not yet implemented.");
+            m_componentPool.Add(eCSComponent);
+            Log(eCSComponent, "Put Component in Pool.");
         }
 
-        internal void RemoveComponent(ECSComponent component)
+        private void Log(ECSComponent component, string val)
         {
-            m_components.Remove(component.QueryID);
+            ECSDebug.Log("[" + component.GetType().Name + "] Put Component in Pool.");
         }
 
         internal void RemoveComponent(int entityID)
         {
-            ECSComponent component = GetComponent(entityID);
-            RemoveComponent(component);
+            ECSComponent removed = m_components[entityID];
+            PoolComponent(removed);
+            m_components.Remove(entityID);
+        }
+
+        internal ECSComponent GetComponent()
+        {
+            if (m_componentPool.Count == 0)
+            {
+                CreateComponent();
+            }
+
+            ECSComponent component = m_componentPool[0];
+            m_componentPool.RemoveAt(0);
+
+            Log(component, "Got Component from Pool");
+
+            return component;
         }
 
         internal ECSComponent GetComponent(int entityID)
@@ -172,9 +152,13 @@ namespace ECS.Core
 
         internal bool HasComponent(int entityID)
         {
-            ECSDebug.Log(m_containerType + " - " + entityID);
-
             return m_components.ContainsKey(entityID);
+        }
+
+        internal void CreateComponent()
+        {
+            ECSComponent component = Activator.CreateInstance(m_containerType) as ECSComponent;
+            PoolComponent(component);
         }
     }
 }

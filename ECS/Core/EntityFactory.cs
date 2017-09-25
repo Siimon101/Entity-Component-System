@@ -41,19 +41,19 @@ namespace ECS.Core
 
             if (HasBaseArchetype(archeTypeData))
             {
-                string baseArchetypeID = archeTypeData["base_archetype"];
+                string baseArchetypeID = archeTypeData["BaseArchetype"];
                 JSONNode baseArchetypeData = m_jsonParsedData[baseArchetypeID];
 
                 if (baseArchetypeData == null)
                 {
-                    ECSDebug.LogError("Base Archetype not found or not supported -> " + archeTypeData["base_archetype"].ToString());
+                    ECSDebug.LogError("Base Archetype not found or not supported -> " + archeTypeData["BaseArchetype"].ToString());
                     return null;
                 }
 
                 mergedJson = MergeJSONData(archetypeID, baseArchetypeID);
+                archeTypeData["Components"] = mergedJson;
             }
 
-            archeTypeData["Components"] = mergedJson;
 
             CreateComponents(e, archeTypeData);
 
@@ -129,7 +129,7 @@ namespace ECS.Core
 
         private bool HasBaseArchetype(JSONNode archeTypeData)
         {
-            return archeTypeData["base_archetype"] != null;
+            return archeTypeData["BaseArchetype"] != null;
         }
 
         private void CreateComponents(Entity e, JSONNode archeTypeData)

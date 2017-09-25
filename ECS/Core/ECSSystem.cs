@@ -25,6 +25,12 @@ namespace ECS.Core
             return m_queryManager.GetComponent<T>(entity);
         }
 
+
+        protected void Log(string value)
+        {
+            ECSDebug.Log("[" + this.GetType().ToString() + "] " + value);
+        }
+
         public virtual void OnEnable() { }
         public virtual void OnDisable() { }
         public virtual void FixedUpdate() { }

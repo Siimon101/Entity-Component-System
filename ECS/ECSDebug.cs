@@ -1,3 +1,6 @@
+using System;
+using ECS.Core;
+using Game.Components.Common;
 using UnityEngine;
 
 namespace ECS
@@ -27,6 +30,7 @@ namespace ECS
             Debug.LogError(DEBUG_PREFIX + log);
         }
 
+
         public static void LogWarning(string log)
         {
             if (m_currentLogType < LogType.WARNINGS)
@@ -37,7 +41,7 @@ namespace ECS
             Debug.LogWarning(DEBUG_PREFIX + log);
         }
 
-        
+
         public static void Log(string log)
         {
             if (m_currentLogType < LogType.ALL)

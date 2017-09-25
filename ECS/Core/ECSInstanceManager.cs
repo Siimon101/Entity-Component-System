@@ -1,4 +1,5 @@
 using System;
+using Game.Systems;
 
 namespace ECS.Core
 {
@@ -8,12 +9,10 @@ namespace ECS.Core
         private ECSEntityManager m_entityManager;
         private ECSComponentManager m_componentManager;
         private ECSSystemManager m_systemManager;
-        private ECSQueryManager m_queryManager;
 
 
-        public ECSInstanceManager(ECSQueryManager queryManager, ECSEntityManager entityManager, ECSComponentManager componentManager, ECSSystemManager systemManager)
+        public ECSInstanceManager(ECSEntityManager entityManager, ECSComponentManager componentManager, ECSSystemManager systemManager)
         {
-            m_queryManager = queryManager;
             m_entityManager = entityManager;
             m_componentManager = componentManager;
             m_systemManager = systemManager;
@@ -29,9 +28,9 @@ namespace ECS.Core
             m_entityManager.DestroyEntity(e);
         }
 
-        public T CreateSystem<T>() where T : ECSSystem
+        internal void RegisterSystem(ECSSystem system, bool autoInitialize = true)
         {
-            return m_systemManager.CreateSystem<T>(m_queryManager);
+            m_systemManager.RegisterSystem(system, autoInitialize);
         }
 
         internal void DestroySystem<T>() where T : ECSSystem
@@ -46,7 +45,7 @@ namespace ECS.Core
 
         public T CreateComponent<T>() where T : ECSComponent
         {
-            return CreateComponent<T>();
+            return m_componentManager.CreateComponent<T>();
         }
 
         public T CreateComponent<T>(Entity e) where T : ECSComponent
@@ -56,14 +55,7 @@ namespace ECS.Core
 
         internal void AddComponent(Entity e, ECSComponent component)
         {
-            m_componentManager.AddComponent(e.QueryID, component, false);
-        }
-
-        
-        internal void AddComponent(Entity e, ECSComponent component, bool replace)
-        {
-            throw new NotImplementedException();
-            m_componentManager.AddComponent(e.QueryID, component, replace);
+            m_componentManager.AddComponent(e.QueryID, component);
         }
 
         public T CreateComponent<T>(int entityID) where T : ECSComponent
@@ -71,14 +63,5 @@ namespace ECS.Core
             return m_componentManager.CreateComponent<T>(entityID);
         }
 
-        public void DestroyComponent<T>(int entityID)
-        {
-            m_componentManager.DestroyComponent<T>(entityID);
-        }
-
-        public void DestroyComponent(ECSComponent component)
-        {
-            m_componentManager.DestroyComponent(component);
-        }
     }
 }

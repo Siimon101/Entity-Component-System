@@ -23,7 +23,9 @@ namespace ECS.Core
             m_entityManager = new ECSEntityManager();
 
             m_queryManager = new ECSQueryManager(m_entityManager, m_componentManager, m_systemManager);
-            m_instanceManager = new ECSInstanceManager(m_queryManager, m_entityManager, m_componentManager, m_systemManager);
+            m_instanceManager = new ECSInstanceManager(m_entityManager, m_componentManager, m_systemManager);
+
+            m_systemManager.Initialize(m_queryManager);
         }
 
 

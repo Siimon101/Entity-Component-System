@@ -12,22 +12,41 @@ namespace ECS.Core
         private Dictionary<string, ECSSystem> m_systems;
 
         private int m_systemsCreated = 0;
+        private ECSQueryManager m_queryManager;
 
         public ECSSystemManager()
         {
             m_systems = new Dictionary<string, ECSSystem>();
         }
 
-        private void AddSystem(ECSSystem system)
+        internal void Initialize(ECSQueryManager queryManager)
         {
+            m_queryManager = queryManager;
+        }
+
+        internal void RegisterSystem(ECSSystem system, bool autoInitialize = true)
+        {
+            system.QueryManager = m_queryManager;
+            system.SystemID = GetSystemID(system);
+            system.QueryID = m_systemsCreated;
+
             if (m_systems.ContainsKey(system.SystemID))
             {
                 ECSDebug.LogError("Tried to add System [" + system.SystemID + "] but it already exists.");
                 return;
             }
 
+            m_systemsCreated++;
+
+            if(autoInitialize)
+            {
+                system.OnEnable();
+                system.Initialize();
+            }
+
             m_systems.Add(system.SystemID, system);
         }
+
 
         private void RemoveSystem(ECSSystem system)
         {
@@ -62,35 +81,22 @@ namespace ECS.Core
             return typeof(T).ToString();
         }
 
-        internal T CreateSystem<T>(ECSQueryManager queryManager, bool autoInitialize = true) where T : ECSSystem
+        private string GetSystemID(ECSSystem system)
         {
-            T system = Activator.CreateInstance<T>();
-            system.QueryManager = queryManager;
-            system.SystemID = GetSystemID<T>();
-            system.QueryID = m_systemsCreated;
-
-            m_systemsCreated++;
-            AddSystem(system);
-
-            if(autoInitialize)
-            {
-                InitializeSystem(system);
-            }
-
-            return system;
+            return system.GetType().ToString();
         }
 
 
         internal void InitializeSystem(ECSSystem system)
         {
-            system.Initialize();            
+            system.Initialize();
             system.OnEnable();
         }
 
 
         internal void DestroySystem(ECSSystem system)
         {
-            if(system == null)
+            if (system == null)
             {
                 return;
             }
