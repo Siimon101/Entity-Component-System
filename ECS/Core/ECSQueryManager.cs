@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace ECS.Core
@@ -21,11 +22,6 @@ namespace ECS.Core
             return m_entityManager.GetEntity(id);
         }
 
-        internal T GetComponent<T>(int id) where T : ECSComponent
-        {
-            return (T)m_componentManager.GetComponent<T>(id);
-        }
-
         internal T GetComponent<T>(Entity e) where T : ECSComponent
         {
             return (T)m_componentManager.GetComponent<T>(e.QueryID);
@@ -41,30 +37,52 @@ namespace ECS.Core
             return m_systemManager.GetSystem<T>();
         }
 
-
-
         internal List<Entity> GetEntitiesWithComponents(params System.Type[] args)
         {
             List<Entity> allEntities = m_entityManager.GetAll();
             List<Entity> entitiesReturned = new List<Entity>(allEntities);
 
-            Entity entity = null;
 
-            foreach (System.Type type in args)
+            Dictionary<Type, ECSComponent> cachedComponents = null;
+            bool toRemove = false;
+
+            for (int i = entitiesReturned.Count - 1; i >= 0; i--)
             {
-                for (int i = entitiesReturned.Count - 1; i >= 0; i--)
-                {
-                    entity = entitiesReturned[i];
+                toRemove = false;
+                cachedComponents = m_componentManager.GetComponents(entitiesReturned[i].QueryID);
 
-                    if (m_componentManager.HasComponent(entity.QueryID, m_componentManager.GetComponentID(type)) == false)
+
+                foreach (Type type in args)
+                {
+                    if (cachedComponents.ContainsKey(type) == false)
                     {
-                        entitiesReturned.RemoveAt(i);
+                        toRemove = true;
+                        break;
                     }
+                }
+
+                if (toRemove)
+                {
+                    entitiesReturned.RemoveAt(i);
                 }
             }
 
             return entitiesReturned;
         }
 
+        internal void StartSytem<T>() where T : ECSSystem
+        {
+            m_systemManager.StartSystem<T>();
+        }
+
+        internal void StopSystem<T>() where T : ECSSystem
+        {
+            m_systemManager.StopSystem<T>();
+        }
+
+        internal void ToggleSystem<T>() where T : ECSSystem
+        {
+            m_systemManager.ToggleSystem<T>();
+        }
     }
 }
