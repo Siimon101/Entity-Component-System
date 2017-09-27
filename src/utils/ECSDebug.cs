@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace btcp.ECS.utils
@@ -50,5 +51,10 @@ namespace btcp.ECS.utils
             Debug.LogError(v);
         }
 
+        internal static void Assert(bool condition, string v)
+        {
+            v = DEBUG_PREFIX + v;
+            Debug.Assert(condition, v);
+        }
     }
 }

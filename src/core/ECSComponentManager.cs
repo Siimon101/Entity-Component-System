@@ -82,6 +82,7 @@ namespace btcp.ECS.core
 
         public Entity RemoveComponent<T>(Entity entity) where T : ECSComponent
         {
+            ECSDebug.Assert(entity != null, "Entity does not exist");
             SafeGetComponentBag(entity.EntityID).Set(SafeGetComponentID(typeof(T)), null);
 
             Message msg = new Message((int)MessageID.EVENT_ENTITY_COMPONENT_REMOVED);
