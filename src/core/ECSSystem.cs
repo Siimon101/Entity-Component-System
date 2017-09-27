@@ -1,6 +1,7 @@
 using System;
+using btcp.ECS.utils;
 
-namespace com.btcp.ECS.core
+namespace btcp.ECS.core
 {
     public class ECSSystem
     {
@@ -21,6 +22,11 @@ namespace com.btcp.ECS.core
             return m_queryManager.GetComponent<T>(entityID);
         }
 
+        protected bool IsEntityValid(int entityID)
+        {
+            return m_queryManager.IsEntityValid(entityID);
+        }
+
         internal virtual void Update()
         {
         }
@@ -31,6 +37,21 @@ namespace com.btcp.ECS.core
 
         internal virtual void FixedUpdate()
         {
+        }
+
+        protected void Log(string v)
+        {
+            ECSDebug.Log("[" + GetType().Name.ToString() + "] " + v);
+        }
+
+        protected void LogWarning(string v)
+        {
+            ECSDebug.LogWarning("[" + GetType().Name.ToString() + "] " + v);
+        }
+
+        protected void LogError(string v)
+        {
+            ECSDebug.LogError("[" + GetType().Name.ToString() + "] " + v);
         }
     }
 }

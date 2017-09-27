@@ -1,10 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using com.btcp.ECS.core;
+using btcp.ECS.core;
 using UnityEngine;
 
-namespace com.btcp.ECS.utils
+namespace btcp.ECS.utils
 {
     public class Bag<T> : IEnumerable
     {
@@ -20,15 +20,16 @@ namespace com.btcp.ECS.utils
 
         public Bag(int capacity)
         {
-            SetCapacity(capacity);
+            m_data = new T[capacity];
         }
+
 
         internal int GetSize()
         {
             return m_size;
         }
 
-        public int GetIndex(T obj)
+        public int Has(T obj)
         {
             for (int i = 0; i < m_size; i++)
             {
@@ -37,7 +38,7 @@ namespace com.btcp.ECS.utils
                     return i;
                 }
             }
-
+            Debug.Log("Does not have " + obj.ToString());
             return -1;
         }
 
@@ -45,7 +46,7 @@ namespace com.btcp.ECS.utils
         {
             if (m_size == m_data.Length)
             {
-                IncreaseSize(m_size * 2);
+                IncreaseCapacity(m_size + 1);
             }
 
             m_data[m_size++] = obj;
@@ -59,23 +60,28 @@ namespace com.btcp.ECS.utils
             }
         }
 
-        internal T SafeGet(int index)
-        {
-            if (index >= m_data.Length)
-            {
-                IncreaseSize(Mathf.Max(index + 1, (m_data.Length * 2)));
-            }
-
-            return m_data[index];
-        }
-
         internal T[] GetAll()
         {
             return m_data;
         }
 
+        internal T SafeGet(int index)
+        {
+            if (index >= m_data.Length)
+            {
+                IncreaseCapacity(Mathf.Max(index + 1, (m_data.Length * 2)));
+            }
+
+            return m_data[index];
+        }
+
         internal T Get(int index)
         {
+            if (index < 0 || index > m_size)
+            {
+                return default(T);
+            }
+
             return m_data[index];
         }
 
@@ -83,16 +89,16 @@ namespace com.btcp.ECS.utils
         {
             if (index >= m_data.Length)
             {
-                IncreaseSize();
+                IncreaseCapacity(index + 1);
             }
 
-            m_size = Mathf.Max(index, m_size + 1);
+            m_size = Mathf.Max(index + 1, m_size);
             m_data[index] = obj;
         }
 
-        public T Remove(int index)
+        public T RemoveIndex(int index)
         {
-            if (index < m_size)
+            if (index <= m_size)
             {
                 T toRemove = m_data[index];
                 m_data[index] = m_data[--m_size];
@@ -102,20 +108,6 @@ namespace com.btcp.ECS.utils
             }
 
             return default(T);
-        }
-
-        internal void Clear(int newCapacity)
-        {
-            Clear(newCapacity);
-        }
-
-        ///  Clears bag and sets capacity 
-        /// <param name="capacity"> The new capacity </param>
-        /// <returns> Returns itself for chaining </returns>
-        internal Bag<T> SetCapacity(int capacity)
-        {
-            m_data = new T[capacity];
-            return this;
         }
 
         internal void Clear()
@@ -128,20 +120,22 @@ namespace com.btcp.ECS.utils
             m_size = 0;
         }
 
-        public void Remove(T obj)
+
+        ///  Sets capacity and clears bag 
+        /// <param name="capacity"> The new capacity </param>
+        internal void Reset(int capacity)
         {
-            Remove(GetIndex(obj));
+            m_data = new T[capacity];
+            m_size = 0;
         }
 
-        private void IncreaseSize()
-        {
-            IncreaseSize((m_size * 3) / 2 + 1);
-        }
 
-        private void IncreaseSize(int amount)
+        ///  Sets capacity and keeps bag items 
+        /// <param name="capacity"> The new capacity </param>
+        internal void IncreaseCapacity(int capacity)
         {
             T[] oldData = m_data;
-            m_data = new T[amount];
+            m_data = new T[capacity];
             oldData.CopyTo(m_data, 0);
         }
 
@@ -197,5 +191,28 @@ namespace com.btcp.ECS.utils
                 m_current = -1;
             }
         }
+
+        internal void ResizeToFit()
+        {
+            List<T> validItems = GetValid();
+            Reset(validItems.Count);
+            Add(validItems);
+        }
+
+
+        internal List<T> GetValid()
+        {
+            List<T> validItems = new List<T>();
+
+            for (int i = 0; i < m_size; i++)
+            {
+                if (m_data[i] != null && m_data[i].Equals(default(T)) == false)
+                {
+                    validItems.Add(m_data[i]);
+                }
+            }
+            return validItems;
+        }
+
     }
 }

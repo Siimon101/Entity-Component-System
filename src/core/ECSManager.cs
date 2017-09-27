@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace com.btcp.ECS.core
+namespace btcp.ECS.core
 {
     public class ECSManager
     {

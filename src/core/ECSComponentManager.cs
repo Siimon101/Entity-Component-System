@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
-using com.btcp.ECS.utils;
+using Assets.Scripts.Utilities.MessageHandler;
+using btcp.ECS.utils;
 
-namespace com.btcp.ECS.core
+namespace btcp.ECS.core
 {
     public class ECSComponentManager
     {
@@ -20,6 +21,11 @@ namespace com.btcp.ECS.core
         public Entity AddComponent(Entity entity, ECSComponent component)
         {
             SafeGetComponentBag(entity.EntityID).Set(SafeGetComponentID(component.GetType()), component);
+
+            Message msg = new Message((int)MessageID.EVENT_ENTITY_COMPONENT_ADDED);
+            msg.SetArgInt("entity_id", entity.EntityID);
+            MessageDispatcher.Instance.QueueMessage(msg);
+
             return entity;
         }
 
@@ -77,6 +83,11 @@ namespace com.btcp.ECS.core
         public Entity RemoveComponent<T>(Entity entity) where T : ECSComponent
         {
             SafeGetComponentBag(entity.EntityID).Set(SafeGetComponentID(typeof(T)), null);
+
+            Message msg = new Message((int)MessageID.EVENT_ENTITY_COMPONENT_REMOVED);
+            msg.SetArgInt("entity_id", entity.EntityID);
+            MessageDispatcher.Instance.QueueMessage(msg);
+
             return entity;
         }
 
@@ -84,6 +95,7 @@ namespace com.btcp.ECS.core
         {
             if (HasComponentBag(id) == false)
             {
+                ECSDebug.LogWarning("Entity " + id + " does not have any components!");
                 return false;
             }
 
@@ -91,8 +103,15 @@ namespace com.btcp.ECS.core
 
             foreach (Type type in args)
             {
-                if (bag.Get(SafeGetComponentID(type)) == null)
+                if (GetComponentID(type) == -1)
                 {
+                    ECSDebug.LogWarning("Component not yet registered " + type.Name.ToString());
+                    return false;
+                }
+
+                if (bag.Get(GetComponentID(type)) == null)
+                {
+                    ECSDebug.LogWarning("Entity " + id + " does not have component " + type.Name.ToString() + " (Component ID : " + GetComponentID(type) + ")");
                     return false;
                 }
             }

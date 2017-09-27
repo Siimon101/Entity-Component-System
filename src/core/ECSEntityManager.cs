@@ -1,7 +1,9 @@
 using System;
-using com.btcp.ECS.utils;
+using System.Collections.Generic;
+using Assets.Scripts.Utilities.MessageHandler;
+using btcp.ECS.utils;
 
-namespace com.btcp.ECS.core
+namespace btcp.ECS.core
 {
     public class ECSEntityManager
     {
@@ -17,8 +19,13 @@ namespace com.btcp.ECS.core
 
         public Entity AddEntity(Entity entity)
         {
-            m_entityBag.Add(entity);
             entity.EntityID = m_entityBag.GetSize();
+            m_entityBag.Add(entity);
+
+            Message msg = new Message((int)MessageID.EVENT_ENTITY_ON_CREATED);
+            msg.SetArgInt("entity_id", entity.EntityID);
+            MessageDispatcher.Instance.QueueMessage(msg);
+
             return entity;
         }
 
@@ -33,27 +40,32 @@ namespace com.btcp.ECS.core
             return m_entityBag.Get(entityID);
         }
 
-        public void RemoveEntity(Entity e)
+        public void RemoveEntity(int entityID)
         {
-            m_entityBag.Set(e.EntityID, null);
+            ECSDebug.Log("Remove Entity " + entityID);
+            Message msg = new Message((int)MessageID.EVENT_ENTITY_ON_DESTROYED);
+            msg.SetArgInt("entity_id", entityID);
+            MessageDispatcher.Instance.QueueMessage(msg);
+
+            m_entityBag.Set(entityID, null);
         }
 
         public int[] GetEntityIdentifiers()
         {
-            int[] identifiers = new int[m_entityBag.GetSize()];
+            List<Entity> validEntities = m_entityBag.GetValid();
+            int[] validEntityIdentifiers = new int[validEntities.Count];
 
-            Entity e = null;
-            for (int i = 0; i < identifiers.Length; i++)
+            for (int i = 0; i < validEntities.Count; i++)
             {
-                e = m_entityBag.Get(i);
-
-                if (e != null)
-                {
-                    identifiers[i] = e.EntityID;
-                }
+                validEntityIdentifiers[i] = validEntities[i].EntityID;
             }
 
-            return identifiers;
+            return validEntityIdentifiers;
+        }
+
+        internal bool IsEntityValid(int entityID)
+        {
+            return (m_entityBag.Get(entityID) != null);
         }
     }
 }

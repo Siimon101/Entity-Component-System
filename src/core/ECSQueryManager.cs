@@ -1,36 +1,47 @@
 using System;
 using System.Collections.Generic;
-using com.btcp.ECS.utils;
+using Assets.Scripts.Utilities.MessageHandler;
+using btcp.ECS.utils;
 
-namespace com.btcp.ECS.core
+namespace btcp.ECS.core
 {
-    public class ECSQueryManager
+    public class ECSQueryManager : IMessageListener
     {
 
         private Dictionary<Type[], Bag<int>> m_queries;
         private ECSComponentManager m_componentManager;
         private ECSEntityManager m_entityManager;
 
+
         public ECSQueryManager(ECSComponentManager componentManager, ECSEntityManager entityManager)
         {
             m_queries = new Dictionary<Type[], Bag<int>>();
             m_componentManager = componentManager;
             m_entityManager = entityManager;
+
+            MessageDispatcher.Instance.BindListener(this, (int)MessageID.EVENT_ENTITY_COMPONENT_ADDED);
+            MessageDispatcher.Instance.BindListener(this, (int)MessageID.EVENT_ENTITY_COMPONENT_REMOVED);
+            MessageDispatcher.Instance.BindListener(this, (int)MessageID.EVENT_ENTITY_ON_DESTROYED);
         }
 
         public int[] GetEntitiesWithComponents(params Type[] args)
         {
-            int[] cachedQuery = GetQuery(args);
+            Bag<int> cachedQuery = GetQuery(args);
 
             if (cachedQuery != null)
             {
-                return cachedQuery;
+                return cachedQuery.GetAll();
             }
 
             return CreateQuery(args);
         }
 
-        private int[] GetQuery(Type[] args)
+        internal bool IsEntityValid(int entityID)
+        {
+            return m_entityManager.IsEntityValid(entityID);
+        }
+
+        private Bag<int> GetQuery(Type[] args)
         {
             bool hasType = false;
 
@@ -63,7 +74,7 @@ namespace com.btcp.ECS.core
                 }
 
                 if (hasType)
-                    return m_queries[typeArray].GetAll();
+                    return m_queries[typeArray];
             }
 
             return null;
@@ -72,7 +83,7 @@ namespace com.btcp.ECS.core
 
         private int[] CreateQuery(Type[] args)
         {
-            UnityEngine.Debug.Log("Created query for args " + args.Length);
+            ECSDebug.Log("Created query for args " + args.Length);
             m_queries[args] = new Bag<int>();
             RefreshQuery(args);
             return m_queries[args].GetAll();
@@ -93,15 +104,73 @@ namespace com.btcp.ECS.core
                 }
             }
 
-            bag.SetCapacity(validIdentifiers.Count);
+            bag.Reset(validIdentifiers.Count);
             bag.Add(validIdentifiers);
-
+            bag.ResizeToFit();
         }
+
+
 
         internal T GetComponent<T>(int entityID) where T : ECSComponent
         {
             return m_componentManager.GetComponent<T>(entityID);
         }
 
+        public void ReceiveMessage(Message message)
+        {
+            if (message.MessageID == (int)MessageID.EVENT_ENTITY_COMPONENT_ADDED)
+            {
+                int entityID = message.GetArgInt("entity_id");
+                Bag<int> query = null;
+
+                foreach (Type[] type in m_queries.Keys)
+                {
+                    query = GetQuery(type);
+
+                    if (query.Has(entityID) == -1)
+                    {
+                        if (m_componentManager.HasComponents(entityID, type))
+                        {
+                            query.Add(entityID);
+                            query.ResizeToFit();
+                        }
+                    }
+                }
+            }
+
+            if (message.MessageID == (int)MessageID.EVENT_ENTITY_COMPONENT_REMOVED)
+            {
+                int entityID = message.GetArgInt("entity_id");
+                Bag<int> query = null;
+
+                foreach (Type[] type in m_queries.Keys)
+                {
+                    query = GetQuery(type);
+
+                    if (m_componentManager.HasComponents(entityID, type) == false)
+                    {
+                        query.RemoveIndex(query.Has(entityID));
+                        query.ResizeToFit();
+                    }
+                }
+            }
+
+            if (message.MessageID == (int)MessageID.EVENT_ENTITY_ON_DESTROYED)
+            {
+                int entityID = message.GetArgInt("entity_id");
+                Bag<int> query = null;
+
+                foreach (Type[] type in m_queries.Keys)
+                {
+                    query = GetQuery(type);
+
+                    if (query.Has(entityID) > -1)
+                    {
+                        query.RemoveIndex(query.Has(entityID));
+                        query.ResizeToFit();
+                    }
+                }
+            }
+        }
     }
 }

@@ -1,9 +1,9 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using com.btcp.ECS.utils;
+using btcp.ECS.utils;
 
-namespace com.btcp.ECS.core
+namespace btcp.ECS.core
 {
 
     public class ECSSystemManager
