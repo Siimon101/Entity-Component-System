@@ -31,8 +31,15 @@ namespace btcp.ECS.utils
 
         public int Has(T obj)
         {
+            ECSDebug.Assert(obj != null, "Null object passed!");
+
             for (int i = 0; i < m_size; i++)
             {
+                if(m_data[i] == null)
+                {
+                    continue;
+                }
+
                 if (m_data[i].Equals(obj))
                 {
                     return i;
@@ -76,7 +83,7 @@ namespace btcp.ECS.utils
             return m_data[index];
         }
 
-        internal T Get(int index)
+        public T Get(int index)
         {
             if (index < 0 || index > m_size)
             {

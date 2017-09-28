@@ -8,7 +8,7 @@ namespace btcp.ECS.helpers
 {
     public class ECSQueryManager : IMessageListener
     {
-
+        //TODO : Consider creating ImmutableArray (non modifiable) for Bag elements, instead of calling bag.GetAll().Clone()
         private Dictionary<Type[], Bag<int>> m_queries;
         private ECSComponentManager m_componentManager;
         private ECSEntityManager m_entityManager;
@@ -64,6 +64,10 @@ namespace btcp.ECS.helpers
             return null;
         }
 
+        internal bool SafeHasComponent<T>(int entityID) where T : ECSComponent
+        {
+            return (m_componentManager.SafeGetComponent<T>(entityID) != null);
+        }
 
         private int[] CreateQuery(Type[] args)
         {
@@ -151,6 +155,7 @@ namespace btcp.ECS.helpers
                 }
             }
         }
+
 
 
 

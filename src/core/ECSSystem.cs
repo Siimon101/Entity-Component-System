@@ -45,6 +45,11 @@ namespace btcp.ECS.core
             m_entityManager.DestroyEntity(entityID);
         }
 
+        protected bool SafeHasComponent<T>(int entityID) where T : ECSComponent
+        {
+            return m_queryManager.SafeHasComponent<T>(entityID);
+        }
+
         internal virtual void Update()
         {
         }
