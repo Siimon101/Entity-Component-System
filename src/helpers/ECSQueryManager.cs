@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Assets.Scripts.Utilities.MessageHandler;
+using btcp.ECS.core;
 using btcp.ECS.utils;
 
-namespace btcp.ECS.core
+namespace btcp.ECS.helpers
 {
     public class ECSQueryManager : IMessageListener
     {
@@ -22,23 +23,6 @@ namespace btcp.ECS.core
             MessageDispatcher.Instance.BindListener(this, (int)MessageID.EVENT_ENTITY_COMPONENT_ADDED);
             MessageDispatcher.Instance.BindListener(this, (int)MessageID.EVENT_ENTITY_COMPONENT_REMOVED);
             MessageDispatcher.Instance.BindListener(this, (int)MessageID.EVENT_ENTITY_ON_DESTROYED);
-        }
-
-        public int[] GetEntitiesWithComponents(params Type[] args)
-        {
-            Bag<int> cachedQuery = GetQuery(args);
-
-            if (cachedQuery != null)
-            {
-                return cachedQuery.GetAll();
-            }
-
-            return CreateQuery(args);
-        }
-
-        internal bool IsEntityValid(int entityID)
-        {
-            return m_entityManager.IsEntityValid(entityID);
         }
 
         private Bag<int> GetQuery(Type[] args)
@@ -83,10 +67,10 @@ namespace btcp.ECS.core
 
         private int[] CreateQuery(Type[] args)
         {
-            ECSDebug.Log("Created query for args " + args.Length);
+            ECSDebug.Log("Created query with args " + args.Length);
             m_queries[args] = new Bag<int>();
             RefreshQuery(args);
-            return m_queries[args].GetAll();
+            return m_queries[args].GetAll().Clone() as int[];
         }
 
         private void RefreshQuery(Type[] args)
@@ -104,16 +88,11 @@ namespace btcp.ECS.core
                 }
             }
 
+
             bag.Reset(validIdentifiers.Count);
             bag.Add(validIdentifiers);
             bag.ResizeToFit();
-        }
 
-
-
-        internal T GetComponent<T>(int entityID) where T : ECSComponent
-        {
-            return m_componentManager.GetComponent<T>(entityID);
         }
 
         public void ReceiveMessage(Message message)
@@ -172,5 +151,32 @@ namespace btcp.ECS.core
                 }
             }
         }
+
+
+
+        internal T GetComponent<T>(int entityID) where T : ECSComponent
+        {
+            return m_componentManager.GetComponent<T>(entityID);
+        }
+
+        public int[] GetEntitiesWithComponents(params Type[] args)
+        {
+            Bag<int> cachedQuery = GetQuery(args);
+
+            if (cachedQuery != null)
+            {
+                return cachedQuery.GetAll().Clone() as int[];
+            }
+
+            return CreateQuery(args);
+        }
+
+        internal bool IsEntityValid(int entityID)
+        {
+            return m_entityManager.IsEntityValid(entityID);
+        }
+
+
+
     }
 }

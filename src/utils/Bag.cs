@@ -38,7 +38,8 @@ namespace btcp.ECS.utils
                     return i;
                 }
             }
-            Debug.Log("Does not have " + obj.ToString());
+
+            ECSDebug.LogWarning("Bag does not have an item in index " + obj.ToString());
             return -1;
         }
 

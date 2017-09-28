@@ -5,7 +5,7 @@ using btcp.ECS.utils;
 
 namespace btcp.ECS.core
 {
-    public class ECSComponentManager
+    public class ECSComponentManager : IMessageListener
     {
 
         private List<Type> m_componentIdentifiers;
@@ -15,18 +15,25 @@ namespace btcp.ECS.core
         {
             m_componentIdentifiers = new List<Type>();
             m_entityComponents = new Dictionary<int, Bag<ECSComponent>>();
+
+            MessageDispatcher.Instance.BindListener(this, (int)MessageID.EVENT_ENTITY_ON_DESTROYED);
         }
 
-
-        public Entity AddComponent(Entity entity, ECSComponent component)
+        public ECSComponent AddComponent(Entity entity, ECSComponent component)
         {
-            SafeGetComponentBag(entity.EntityID).Set(SafeGetComponentID(component.GetType()), component);
+            return AddComponent(entity.EntityID, component);
+        }
+
+        public ECSComponent AddComponent(int entityID, ECSComponent component)
+        {
+            SafeGetComponentBag(entityID).Set(SafeGetComponentID(component.GetType()), component);
 
             Message msg = new Message((int)MessageID.EVENT_ENTITY_COMPONENT_ADDED);
-            msg.SetArgInt("entity_id", entity.EntityID);
+            msg.SetArgInt("entity_id", entityID);
+            msg.SetArgInt("component_id", GetComponentID(component.GetType()));
             MessageDispatcher.Instance.QueueMessage(msg);
 
-            return entity;
+            return component;
         }
 
         private Bag<ECSComponent> SafeGetComponentBag(int entityID)
@@ -65,7 +72,7 @@ namespace btcp.ECS.core
         }
 
 
-        private int SafeGetComponentID(Type type)
+        public int SafeGetComponentID(Type type)
         {
             if (m_componentIdentifiers.IndexOf(type) == -1)
             {
@@ -75,7 +82,7 @@ namespace btcp.ECS.core
             return GetComponentID(type);
         }
 
-        private int GetComponentID(Type type)
+        public int GetComponentID(Type type)
         {
             return m_componentIdentifiers.IndexOf(type);
         }
@@ -83,13 +90,22 @@ namespace btcp.ECS.core
         public Entity RemoveComponent<T>(Entity entity) where T : ECSComponent
         {
             ECSDebug.Assert(entity != null, "Entity does not exist");
-            SafeGetComponentBag(entity.EntityID).Set(SafeGetComponentID(typeof(T)), null);
 
             Message msg = new Message((int)MessageID.EVENT_ENTITY_COMPONENT_REMOVED);
             msg.SetArgInt("entity_id", entity.EntityID);
+            msg.SetArgInt("component_id", GetComponentID(typeof(T)));
             MessageDispatcher.Instance.QueueMessage(msg);
 
+            GetComponentBag(entity.EntityID).Set(GetComponentID(typeof(T)), null);
+
             return entity;
+        }
+
+        private void RemoveAllComponents(int v)
+        {
+            Bag<ECSComponent> componentBag = GetComponentBag(v);
+            componentBag.Clear();
+            m_entityComponents.Remove(v);
         }
 
         internal bool HasComponents(int id, Type[] args)
@@ -119,5 +135,15 @@ namespace btcp.ECS.core
 
             return true;
         }
+
+        public void ReceiveMessage(Message message)
+        {
+            if (message.MessageID == (int)MessageID.EVENT_ENTITY_ON_DESTROYED)
+            {
+                RemoveAllComponents(message.GetArgInt("entity_id"));
+            }
+        }
+
+
     }
 }

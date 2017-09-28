@@ -15,7 +15,7 @@ namespace btcp.ECS.utils
         }
 
 
-        private static DebugLevel m_debugLevel = DebugLevel.All;
+        private static DebugLevel m_debugLevel = DebugLevel.Errors;
         private const string DEBUG_PREFIX = "[ECSDebug] ";
 
         public static void Log(string v)
@@ -55,6 +55,12 @@ namespace btcp.ECS.utils
         {
             v = DEBUG_PREFIX + v;
             Debug.Assert(condition, v);
+        }
+
+        internal static void LogForce(string v)
+        {
+            v = DEBUG_PREFIX + v;
+            Debug.Log(v);
         }
     }
 }

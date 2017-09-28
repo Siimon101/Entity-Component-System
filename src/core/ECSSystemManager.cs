@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using btcp.ECS.helpers;
 using btcp.ECS.utils;
 
 namespace btcp.ECS.core
@@ -10,6 +11,8 @@ namespace btcp.ECS.core
     {
 
         private ECSQueryManager m_queryManager;
+        private ECSEntityManager m_entityManager;
+
         private List<Type> m_systemIdentifiers;
         private Bag<ECSSystem> m_systems;
 
@@ -19,15 +22,16 @@ namespace btcp.ECS.core
             m_systems = new Bag<ECSSystem>();
         }
 
-        public void Initialize(ECSQueryManager queryManager)
+        public void Initialize(ECSQueryManager queryManager, ECSEntityManager entityManager)
         {
             m_queryManager = queryManager;
+            m_entityManager = entityManager;
         }
 
         public void CreateSystem(ECSSystem system)
         {
             m_systems.Add(system);
-            system.Provide(m_queryManager);
+            system.Provide(m_queryManager, m_entityManager);
         }
 
         public void RemoveSystem<T>() where T : ECSSystem
@@ -51,28 +55,28 @@ namespace btcp.ECS.core
             return m_systemIdentifiers.IndexOf(systemType);
         }
 
-		public void Update()
-		{
-			foreach(ECSSystem system in m_systems)
-			{
-				system.Update();
-			}
-		}
+        public void Update()
+        {
+            foreach (ECSSystem system in m_systems)
+            {
+                system.Update();
+            }
+        }
 
-		public void FixedUpdate()
-		{
-			foreach(ECSSystem system in m_systems)
-			{
-				system.FixedUpdate();
-			}
-		}
+        public void FixedUpdate()
+        {
+            foreach (ECSSystem system in m_systems)
+            {
+                system.FixedUpdate();
+            }
+        }
 
-		public void LateUpdate()
-		{
-			foreach(ECSSystem system in m_systems)
-			{
-				system.LateUpdate();
-			}
-		}
+        public void LateUpdate()
+        {
+            foreach (ECSSystem system in m_systems)
+            {
+                system.LateUpdate();
+            }
+        }
     }
 }

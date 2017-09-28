@@ -7,20 +7,25 @@ namespace btcp.ECS.core
 {
     public class ECSEntityManager
     {
-
         private Bag<Entity> m_entityBag;
 
+        private ECSEntityFactory m_entityFactory;
 
         public ECSEntityManager()
         {
             m_entityBag = new Bag<Entity>();
         }
 
+        public void Initialize(ECSComponentManager componentManager)
+        {
+            m_entityFactory = new ECSEntityFactory(componentManager);
+        }
+
 
         public Entity AddEntity(Entity entity)
         {
-            entity.EntityID = m_entityBag.GetSize();
             m_entityBag.Add(entity);
+            entity.EntityID = m_entityBag.GetSize();
 
             Message msg = new Message((int)MessageID.EVENT_ENTITY_ON_CREATED);
             msg.SetArgInt("entity_id", entity.EntityID);
@@ -29,10 +34,17 @@ namespace btcp.ECS.core
             return entity;
         }
 
-        public Entity CreateEntity()
+        internal Entity CreateEntity()
         {
-            Entity entity = new Entity();
-            return AddEntity(entity);
+            Entity e = new Entity();
+            return AddEntity(e);
+        }
+
+        internal Entity CreateEntity(string archetype)
+        {
+            Entity entity = CreateEntity();
+            m_entityFactory.LoadArchetype(entity.EntityID, archetype);
+            return entity;
         }
 
         public Entity GetEntity(int entityID)
@@ -40,13 +52,12 @@ namespace btcp.ECS.core
             return m_entityBag.Get(entityID);
         }
 
-        public void RemoveEntity(int entityID)
+        public void DestroyEntity(int entityID)
         {
-            ECSDebug.Log("Remove Entity " + entityID);
             Message msg = new Message((int)MessageID.EVENT_ENTITY_ON_DESTROYED);
             msg.SetArgInt("entity_id", entityID);
             MessageDispatcher.Instance.QueueMessage(msg);
-
+            
             m_entityBag.Set(entityID, null);
         }
 
