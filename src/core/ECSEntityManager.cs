@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Assets.Scripts.Utilities.MessageHandler;
+using btcp.ECS.etc;
 using btcp.ECS.utils;
 
 namespace btcp.ECS.core
@@ -9,12 +10,17 @@ namespace btcp.ECS.core
     {
         private Bag<Entity> m_entityBag;
 
-        private ECSEntityFactory m_entityFactory;
+        private IECSEntityFactory m_entityCreator;
 
         public ECSEntityManager()
         {
             m_entityBag = new Bag<Entity>();
-            m_entityFactory = new ECSEntityFactory();
+            m_entityCreator = new NULLEntityCreator();
+        }
+
+        public void Provide(IECSEntityFactory creator)
+        {
+            m_entityCreator = creator;
         }
 
         ///<summary> Adds <see cref="Entity"/> to ECS </summary>
@@ -33,14 +39,15 @@ namespace btcp.ECS.core
         ///<summary> Creates and adds <see cref="Entity"/> to ECS </summary>
         internal Entity CreateEntity()
         {
-            Entity e = m_entityFactory.CreateEntity();
+            Entity e = new Entity();
             return AddEntity(e);
         }
 
         ///<summary> Creates and adds <see cref="Entity"/> to ECS </summary>
         internal Entity CreateEntity(string archetype)
         {
-            return m_entityFactory.CreateEntity(archetype);
+            Entity e = CreateEntity();
+            return m_entityCreator.CreateEntityFromArchetype(e, archetype);
         }
 
         public Entity GetEntity(int entityID)

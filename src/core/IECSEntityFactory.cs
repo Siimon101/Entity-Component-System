@@ -1,6 +1,6 @@
 namespace btcp.ECS.core
 {
-    public interface IECSEntityCreator
+    public interface IECSEntityFactory
     {
         Entity CreateEntityFromArchetype(Entity e, string archetype);
     }
