@@ -1,61 +1,36 @@
 using System;
-using btcp.halloweenpumpkin.src.core.Components;
-using btcp.halloweenpumpkin.src.utils;
+using btcp.ECS.etc;
+using btcp.ECS.utils;
 using UnityEngine;
 
 namespace btcp.ECS.core
 {
     public class ECSEntityFactory
     {
-        private ECSComponentManager m_componentManager;
-        public ECSEntityFactory(ECSComponentManager componentManager)
+        
+        private IECSEntityCreator m_entityCreator;
+        public ECSEntityFactory()
         {
-            m_componentManager = componentManager;
+            m_entityCreator = new NULLEntityCreator();
         }
 
-        public int LoadArchetype(int entityID, string archetype)
+        public void Provide(IECSEntityCreator entityCreator)
         {
-
-            if (archetype == "pumpkin_normal_001")
-            {
-                AddPumpkinComponents(entityID, archetype);
-            }
-
-            if (archetype == "pumpkin_rotten_001")
-            {
-                AddPumpkinComponents(entityID, archetype);
-            }
-
-            if (archetype == "pumpkin_special_001")
-            {
-                AddPumpkinComponents(entityID, archetype);
-            }
-
-            if (archetype == "ejector_001")
-            {
-                GameObject go = CreateGameObjectFromArchetype(archetype);
-                m_componentManager.AddComponent(entityID, new CTransform(go));
-                m_componentManager.AddComponent(entityID, new CSpriteRenderer(go.GetComponentInChildren<SpriteRenderer>()));
-                m_componentManager.AddComponent(entityID, new CBoxCollider(go.GetComponentInChildren<BoxCollider2D>()));
-                m_componentManager.AddComponent(entityID, new CEjector());
-            }
-
-            return entityID;
+            m_entityCreator = entityCreator;
         }
 
-        private void AddPumpkinComponents(int entityID, string archetype)
+        internal Entity CreateEntity()
         {
-            GameObject go = CreateGameObjectFromArchetype(archetype);
-            m_componentManager.AddComponent(entityID, new CTransform(go));
-            m_componentManager.AddComponent(entityID, new CSpriteRenderer(go.GetComponentInChildren<SpriteRenderer>()));
-            m_componentManager.AddComponent(entityID, new CBoxCollider(go.GetComponentInChildren<BoxCollider2D>()));
-            m_componentManager.AddComponent(entityID, new CMovement());
-            m_componentManager.AddComponent(entityID, new CConveyorItem());
+            return new Entity();
         }
 
-        private GameObject CreateGameObjectFromArchetype(string archetype)
+        public Entity CreateEntity(string archetype)
         {
-            return GameObject.Instantiate(ResourceManager.Get<GameObject>("Prefabs/" + archetype));
+            ECSDebug.Assert(m_entityCreator != null, "Entity Creator not provided!");
+
+            Entity entity = CreateEntity();
+            m_entityCreator.CreateEntityFromArchetype(entity, archetype);
+            return entity;
         }
     }
 }

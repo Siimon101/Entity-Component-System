@@ -20,9 +20,9 @@ namespace btcp.ECS.helpers
             m_componentManager = componentManager;
             m_entityManager = entityManager;
 
-            MessageDispatcher.Instance.BindListener(this, (int)MessageID.EVENT_ENTITY_COMPONENT_ADDED);
-            MessageDispatcher.Instance.BindListener(this, (int)MessageID.EVENT_ENTITY_COMPONENT_REMOVED);
-            MessageDispatcher.Instance.BindListener(this, (int)MessageID.EVENT_ENTITY_ON_DESTROYED);
+            MessageDispatcher.Instance.BindListener(this, (int)MessageID.EVENT_ECS_COMPONENT_ADDED);
+            MessageDispatcher.Instance.BindListener(this, (int)MessageID.EVENT_ECS_COMPONENT_REMOVED);
+            MessageDispatcher.Instance.BindListener(this, (int)MessageID.EVENT_ECS_ENTITY_DESTROYED);
         }
 
         private Bag<int> GetQuery(Type[] args)
@@ -101,7 +101,7 @@ namespace btcp.ECS.helpers
 
         public void ReceiveMessage(Message message)
         {
-            if (message.MessageID == (int)MessageID.EVENT_ENTITY_COMPONENT_ADDED)
+            if (message.MessageID == (int)MessageID.EVENT_ECS_COMPONENT_ADDED)
             {
                 int entityID = message.GetArgInt("entity_id");
                 Bag<int> query = null;
@@ -121,7 +121,7 @@ namespace btcp.ECS.helpers
                 }
             }
 
-            if (message.MessageID == (int)MessageID.EVENT_ENTITY_COMPONENT_REMOVED)
+            if (message.MessageID == (int)MessageID.EVENT_ECS_COMPONENT_REMOVED)
             {
                 int entityID = message.GetArgInt("entity_id");
                 Bag<int> query = null;
@@ -138,7 +138,7 @@ namespace btcp.ECS.helpers
                 }
             }
 
-            if (message.MessageID == (int)MessageID.EVENT_ENTITY_ON_DESTROYED)
+            if (message.MessageID == (int)MessageID.EVENT_ECS_ENTITY_DESTROYED)
             {
                 int entityID = message.GetArgInt("entity_id");
                 Bag<int> query = null;
