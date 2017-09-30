@@ -1,7 +1,6 @@
 namespace btcp.ECS.core
 {
-    public class ECSComponent
+    public abstract class ECSComponent
     {
-
     }
 }

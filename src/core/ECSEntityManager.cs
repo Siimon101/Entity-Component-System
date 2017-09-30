@@ -10,17 +10,17 @@ namespace btcp.ECS.core
     {
         private Bag<Entity> m_entityBag;
 
-        private IECSEntityFactory m_entityCreator;
+        private IECSEntityFactory m_entityFactory;
 
         public ECSEntityManager()
         {
             m_entityBag = new Bag<Entity>();
-            m_entityCreator = new NULLEntityCreator();
+            m_entityFactory = new NULLEntityFactory();
         }
 
-        public void Provide(IECSEntityFactory creator)
+        public void Provide(IECSEntityFactory factory)
         {
-            m_entityCreator = creator;
+            m_entityFactory = factory;
         }
 
         ///<summary> Adds <see cref="Entity"/> to ECS </summary>
@@ -39,15 +39,14 @@ namespace btcp.ECS.core
         ///<summary> Creates and adds <see cref="Entity"/> to ECS </summary>
         internal Entity CreateEntity()
         {
-            Entity e = new Entity();
+            Entity e = m_entityFactory.CreateEntity();
             return AddEntity(e);
         }
 
         ///<summary> Creates and adds <see cref="Entity"/> to ECS </summary>
         internal Entity CreateEntity(string archetype)
         {
-            Entity e = CreateEntity();
-            return m_entityCreator.CreateEntityFromArchetype(e, archetype);
+            return m_entityFactory.CreateEntity(archetype);
         }
 
         public Entity GetEntity(int entityID)

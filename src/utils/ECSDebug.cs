@@ -15,10 +15,10 @@ namespace btcp.ECS.utils
         }
 
 
-        private static DebugLevel m_debugLevel = DebugLevel.Warnings;
+        private static DebugLevel m_debugLevel = DebugLevel.All;
         private const string DEBUG_PREFIX = "[ECSDebug] ";
 
-        public static void Log(string v)
+        public static void Log(object v)
         {
             if (m_debugLevel < DebugLevel.All)
             {
@@ -29,7 +29,7 @@ namespace btcp.ECS.utils
             Debug.Log(v);
         }
 
-        public static void LogWarning(string v)
+        public static void LogWarning(object v)
         {
             if (m_debugLevel < DebugLevel.Warnings)
             {
@@ -40,7 +40,7 @@ namespace btcp.ECS.utils
             Debug.LogWarning(v);
         }
 
-        public static void LogError(string v)
+        public static void LogError(object v)
         {
             if (m_debugLevel < DebugLevel.Errors)
             {
@@ -51,13 +51,13 @@ namespace btcp.ECS.utils
             Debug.LogError(v);
         }
 
-        internal static void Assert(bool condition, string v)
+        internal static void Assert(bool condition, object v)
         {
             v = DEBUG_PREFIX + v;
             Debug.Assert(condition, v);
         }
 
-        internal static void LogForce(string v)
+        internal static void LogForce(object v)
         {
             v = DEBUG_PREFIX + v;
             Debug.Log(v);

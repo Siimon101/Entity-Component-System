@@ -3,12 +3,19 @@ using btcp.ECS.utils;
 
 namespace btcp.ECS.etc
 {
-    public class NULLEntityCreator : IECSEntityFactory
+    public class NULLEntityFactory : IECSEntityFactory
     {
-        public Entity CreateEntityFromArchetype(Entity e, string archetype)
+
+        public Entity CreateEntity(string archetype)
+        {
+            return CreateEntity();
+        }
+
+        public Entity CreateEntity()
         {
             ECSDebug.LogWarning("IECSEntityCreator was not provided.. Using NULLEntityCreator!");
-            return e;
+            return new Entity();
         }
+
     }
 }

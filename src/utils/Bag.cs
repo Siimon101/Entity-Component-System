@@ -6,13 +6,15 @@ using UnityEngine;
 
 namespace btcp.ECS.utils
 {
-    public class Bag<T> : IEnumerable
+    public class Bag<T> : IEnumerable, IDebuggable
     {
 
         private T[] m_data;
         protected int m_size = 0;
 
         private BagIterator m_iterator;
+
+        public bool IsDebugOn { get; set; }
 
         public Bag() : this(64)
         {
@@ -31,22 +33,23 @@ namespace btcp.ECS.utils
 
         public int Has(T obj)
         {
-            ECSDebug.Assert(obj != null, "Null object passed!");
+            Assert(obj != null, "Null object passed!");
 
             for (int i = 0; i < m_size; i++)
             {
-                if(m_data[i] == null)
+                
+                if (m_data[i] == null)
                 {
                     continue;
                 }
 
-                if (m_data[i].Equals(obj))
+                if (EqualityComparer<T>.Default.Equals(m_data[i], obj))
                 {
                     return i;
                 }
             }
 
-            ECSDebug.LogWarning("Bag does not have an item in index " + obj.ToString());
+            LogWarning("Bag does not have an item " + obj.ToString());
             return -1;
         }
 
@@ -57,6 +60,7 @@ namespace btcp.ECS.utils
                 IncreaseCapacity(m_size + 1);
             }
 
+            Log("Added item " + obj);
             m_data[m_size++] = obj;
         }
 
@@ -222,5 +226,36 @@ namespace btcp.ECS.utils
             return validItems;
         }
 
+        public void Log(object v)
+        {
+            if (IsDebugOn)
+            {
+                ECSDebug.Log(v);
+            }
+        }
+
+        public void LogError(object v)
+        {
+            if (IsDebugOn)
+            {
+                ECSDebug.LogError(v);
+            }
+        }
+
+        public void LogWarning(object v)
+        {
+            if (IsDebugOn)
+            {
+                ECSDebug.LogWarning(v);
+            }
+        }
+
+        public void Assert(bool condition, object v)
+        {
+            if (IsDebugOn)
+            {
+                ECSDebug.Assert(condition, v);
+            }
+        }
     }
 }
