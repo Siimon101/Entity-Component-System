@@ -101,6 +101,7 @@ namespace btcp.ECS.core
             return entity;
         }
 
+
         private void RemoveAllComponents(int v)
         {
             Bag<ECSComponent> componentBag = GetComponentBag(v);
@@ -108,27 +109,43 @@ namespace btcp.ECS.core
             m_entityComponents.Remove(v);
         }
 
-        internal bool HasComponents(int id, Type[] args)
+
+        internal bool HasComponent<T>(int entityID)
         {
-            if (HasComponentBag(id) == false)
+            return HasComponent(entityID, typeof(T));
+        }
+
+
+        public bool HasComponent(int entityID, Type type)
+        {
+            if (HasComponentBag(entityID) == false)
             {
-                ECSDebug.LogWarning("Entity " + id + " does not have any components!");
+                ECSDebug.LogWarning("Entity " + entityID + " does not have any components!");
                 return false;
             }
 
-            Bag<ECSComponent> bag = GetComponentBag(id);
+            Bag<ECSComponent> bag = GetComponentBag(entityID);
+            if (GetComponentID(type) == -1)
+            {
+                ECSDebug.LogWarning("Component not yet registered " + type.Name.ToString());
+                return false;
+            }
 
+            if (bag.Get(GetComponentID(type)) == null)
+            {
+                ECSDebug.LogWarning("Entity " + entityID + " does not have component " + type.Name.ToString() + " (Component ID : " + GetComponentID(type) + ")");
+                return false;
+            }
+
+            return true;
+        }
+
+        internal bool HasComponents(int id, Type[] args)
+        {
             foreach (Type type in args)
             {
-                if (GetComponentID(type) == -1)
+                if (HasComponent(id, type) == false)
                 {
-                    ECSDebug.LogWarning("Component not yet registered " + type.Name.ToString());
-                    return false;
-                }
-
-                if (bag.Get(GetComponentID(type)) == null)
-                {
-                    ECSDebug.LogWarning("Entity " + id + " does not have component " + type.Name.ToString() + " (Component ID : " + GetComponentID(type) + ")");
                     return false;
                 }
             }

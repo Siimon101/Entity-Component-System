@@ -868,7 +868,18 @@ namespace SimpleJSON
  
         public override JSONNodeType Tag { get { return JSONNodeType.Object; } }
         public override bool IsObject { get { return true; } }
- 
+
+        public List<string> GetKeys()
+        {
+            List<string> keys = new List<string>();
+
+            foreach(string key in m_Dict.Keys)
+            {
+                keys.Add(key);
+            }
+
+            return keys;
+        }
  
         public override JSONNode this[string aKey]
         {

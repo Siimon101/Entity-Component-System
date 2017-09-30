@@ -1,9 +1,13 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using btcp.ECS.core;
+using btcp.ECS.interfaces;
 using btcp.ECS.utils;
+using btcp.halloweenpumpkin.src.core.Components;
 using SimpleJSON;
+using UnityEngine;
 
 namespace btcp.ECS.etc
 {
@@ -101,7 +105,6 @@ namespace btcp.ECS.etc
 
             for (int i = 0; i < componentDataArray.Count; i++)
             {
-
                 data = componentDataArray[i];
                 componentType = GetComponentTypeByName(m_dataLocator.GetComponentName(data));
 
@@ -110,7 +113,7 @@ namespace btcp.ECS.etc
                     continue;
                 }
 
-                ECSComponent component = Activator.CreateInstance(componentType) as ECSComponent;
+                ECSComponent component = JsonUtility.FromJson(data.ToString(), componentType) as ECSComponent;
                 ECSDebug.Assert(component != null, "Failed to create Component " + m_dataLocator.GetComponentName(data));
 
                 components.Add(component);
@@ -132,6 +135,47 @@ namespace btcp.ECS.etc
             return m_componentClasses[componentName];
         }
 
+        public JSONNode OverwriteBaseArchetypeData(JSONNode baseArchetypeData, JSONNode newArchetypeData)
+        {
+            JSONNode originalData = JSONNode.Parse(newArchetypeData.ToString());
+
+            baseArchetypeData = m_dataLocator.GetComponentData(baseArchetypeData);
+            newArchetypeData = m_dataLocator.GetComponentData(newArchetypeData);
+
+            JSONNode replacedValues = JSONObject.Parse(baseArchetypeData.ToString());
+            List<string> valueKeys = new List<string>();
+
+            bool hasComponent = false;
+
+            foreach (JSONObject newComponent in newArchetypeData.Children)
+            {
+                hasComponent = false;
+                foreach (JSONObject baseComponent in replacedValues.Children)
+                {
+                    if (m_dataLocator.GetComponentName(baseComponent) != m_dataLocator.GetComponentName(newComponent))
+                    {
+                        continue;
+                    }
+
+                    hasComponent = true;
+                    valueKeys = newComponent.GetKeys();
+
+                    foreach (var newValueKey in valueKeys)
+                    {
+                        baseComponent[newValueKey].Add(newValueKey, newComponent[newValueKey].Value);
+                    }
+                }
+
+                if (hasComponent == false)
+                {
+                    replacedValues.Add(newComponent);
+                }
+            }
+
+            m_dataLocator.SetComponentData(originalData, replacedValues);
+
+            return originalData;
+        }
 
         public JSONNode GetArchetypeData(string v)
         {

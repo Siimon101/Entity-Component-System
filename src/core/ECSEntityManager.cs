@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Utilities.MessageHandler;
 using btcp.ECS.etc;
+using btcp.ECS.interfaces;
 using btcp.ECS.utils;
 
 namespace btcp.ECS.core
@@ -15,7 +16,7 @@ namespace btcp.ECS.core
         public ECSEntityManager()
         {
             m_entityBag = new Bag<Entity>();
-            m_entityFactory = new NULLEntityFactory();
+            m_entityFactory = new EntityFactory_NULL();
         }
 
         public void Provide(IECSEntityFactory factory)
