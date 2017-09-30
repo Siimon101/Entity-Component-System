@@ -1,0 +1,25 @@
+{
+    "Entities": {
+        "EntityOne": {
+            "BaseArchetype": "EntityTwo",
+            "Components": [
+                {
+                    "ComponentName": "CTransform",
+                    "Name": "Entity1"
+                }
+            ]
+        },
+        "EntityTwo": {
+            "Components": [
+                {
+                    "ComponentName": "CTransform",
+                    "Name": "Entity2"
+                },
+                {
+                    "ComponentName": "CSpriteRenderer",
+                    "SpriteID": "MySprite2"
+                }
+            ]
+        }
+    }
+}
