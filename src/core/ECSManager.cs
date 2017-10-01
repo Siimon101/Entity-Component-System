@@ -1,13 +1,7 @@
-﻿using System;
-using btcp.ECS.helpers;
-
-namespace btcp.ECS.core
+﻿namespace btcp.ECS.core
 {
     public class ECSManager
     {
-
-        //TODO : Refactor code to avoid access to same method from different classes QueryManager.GetEntity, EntityManager.GetEntity
-        //Maybe use QueryManager and InstanceManager?
 
         private ECSEntityManager m_entityManager;
         private ECSComponentManager m_componentManager;

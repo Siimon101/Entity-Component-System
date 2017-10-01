@@ -4,9 +4,9 @@ using Assets.Scripts.Utilities.MessageHandler;
 using btcp.ECS.core;
 using btcp.ECS.utils;
 
-namespace btcp.ECS.helpers
+namespace btcp.ECS.core
 {
-    public class ECSQueryManager : IMessageListener
+    public class ECSQueryManager
     {
         //TODO : Consider creating ImmutableArray (non modifiable) for Bag elements, instead of calling bag.GetAll().Clone()
         private Dictionary<Type[], Bag<int>> m_queries;
@@ -20,9 +20,9 @@ namespace btcp.ECS.helpers
             m_componentManager = componentManager;
             m_entityManager = entityManager;
 
-            MessageDispatcher.Instance.BindListener(this, (int)MessageID.EVENT_ECS_COMPONENT_ADDED);
-            MessageDispatcher.Instance.BindListener(this, (int)MessageID.EVENT_ECS_COMPONENT_REMOVED);
-            MessageDispatcher.Instance.BindListener(this, (int)MessageID.EVENT_ECS_ENTITY_DESTROYED);
+            m_componentManager.OnComponentAdded += OnComponentAdded;
+            m_componentManager.OnComponentRemoved += OnComponentAdded;
+            m_entityManager.OnEntityDestroyed += OnEntityDestroyed;
         }
 
         private Bag<int> GetQuery(Type[] args)
@@ -99,59 +99,55 @@ namespace btcp.ECS.helpers
 
         }
 
-        public void ReceiveMessage(Message message)
+        private void OnEntityDestroyed(Entity entity)
         {
-            if (message.MessageID == (int)MessageID.EVENT_ECS_COMPONENT_ADDED)
+            int entityID = entity.EntityID;
+            Bag<int> query = null;
+
+            foreach (Type[] type in m_queries.Keys)
             {
-                int entityID = message.GetArgInt("entity_id");
-                Bag<int> query = null;
+                query = GetQuery(type);
 
-                foreach (Type[] type in m_queries.Keys)
+                if (query.Has(entityID) > -1)
                 {
-                    query = GetQuery(type);
-
-                    if (query.Has(entityID) == -1)
-                    {
-                        if (m_componentManager.HasComponents(entityID, type))
-                        {
-                            query.Add(entityID);
-                            query.ResizeToFit();
-                        }
-                    }
+                    query.RemoveIndex(query.Has(entityID));
+                    query.ResizeToFit();
                 }
             }
+        }
 
-            if (message.MessageID == (int)MessageID.EVENT_ECS_COMPONENT_REMOVED)
+        private void OnComponentAdded(int entityID, ECSComponent component)
+        {
+            Bag<int> query = null;
+
+            foreach (Type[] type in m_queries.Keys)
             {
-                int entityID = message.GetArgInt("entity_id");
-                Bag<int> query = null;
+                query = GetQuery(type);
 
-                foreach (Type[] type in m_queries.Keys)
+                if (query.Has(entityID) == -1)
                 {
-                    query = GetQuery(type);
-
-                    if (m_componentManager.HasComponents(entityID, type) == false)
+                    if (m_componentManager.HasComponents(entityID, type))
                     {
-                        query.RemoveIndex(query.Has(entityID));
+                        query.Add(entityID);
                         query.ResizeToFit();
                     }
                 }
             }
+        }
 
-            if (message.MessageID == (int)MessageID.EVENT_ECS_ENTITY_DESTROYED)
+
+        private void OnComponentRemoved(int entityID, ECSComponent component)
+        {
+            Bag<int> query = null;
+
+            foreach (Type[] type in m_queries.Keys)
             {
-                int entityID = message.GetArgInt("entity_id");
-                Bag<int> query = null;
+                query = GetQuery(type);
 
-                foreach (Type[] type in m_queries.Keys)
+                if (m_componentManager.HasComponents(entityID, type) == false)
                 {
-                    query = GetQuery(type);
-
-                    if (query.Has(entityID) > -1)
-                    {
-                        query.RemoveIndex(query.Has(entityID));
-                        query.ResizeToFit();
-                    }
+                    query.RemoveIndex(query.Has(entityID));
+                    query.ResizeToFit();
                 }
             }
         }

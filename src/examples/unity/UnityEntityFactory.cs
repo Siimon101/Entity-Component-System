@@ -2,14 +2,13 @@ using System;
 using System.Collections.Generic;
 using btcp.ECS.core;
 using btcp.ECS.etc;
+using btcp.ECS.examples.unity.components;
 using btcp.ECS.interfaces;
 using btcp.ECS.utils;
-using btcp.halloweenpumpkin.src.core.Components;
-using btcp.halloweenpumpkin.src.utils;
 using SimpleJSON;
 using UnityEngine;
 
-namespace btcp.ECS.examples
+namespace btcp.ECS.examples.unity
 {
     public class EntityFactory_Unity : IECSEntityFactory
     {

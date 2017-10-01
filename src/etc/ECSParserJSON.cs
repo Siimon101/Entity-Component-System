@@ -5,7 +5,6 @@ using System.Reflection;
 using btcp.ECS.core;
 using btcp.ECS.interfaces;
 using btcp.ECS.utils;
-using btcp.halloweenpumpkin.src.core.Components;
 using SimpleJSON;
 using UnityEngine;
 

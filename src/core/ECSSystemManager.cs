@@ -1,7 +1,6 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using btcp.ECS.helpers;
 using btcp.ECS.utils;
 
 namespace btcp.ECS.core

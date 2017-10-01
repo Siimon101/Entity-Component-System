@@ -9,6 +9,11 @@ namespace btcp.ECS.core
 {
     public class ECSEntityManager
     {
+
+        public delegate void EntityCallback(Entity e);
+        public event EntityCallback OnEntityCreated;
+        public event EntityCallback OnEntityDestroyed;
+
         private Bag<Entity> m_entityBag;
 
         private IECSEntityFactory m_entityFactory;
@@ -30,10 +35,7 @@ namespace btcp.ECS.core
             m_entityBag.Add(entity);
             entity.EntityID = m_entityBag.GetSize();
 
-            Message msg = new Message((int)MessageID.EVENT_ECS_ENTITY_CREATED);
-            msg.SetArgInt("entity_id", entity.EntityID);
-            MessageDispatcher.Instance.QueueMessage(msg);
-
+            OnEntityCreated(entity);
             return entity;
         }
 
@@ -57,10 +59,7 @@ namespace btcp.ECS.core
 
         public void DestroyEntity(int entityID)
         {
-            Message msg = new Message((int)MessageID.EVENT_ECS_ENTITY_DESTROYED);
-            msg.SetArgInt("entity_id", entityID);
-            MessageDispatcher.Instance.QueueMessage(msg);
-
+            OnEntityDestroyed(m_entityBag.Get(entityID));
             m_entityBag.Set(entityID, null);
         }
 
