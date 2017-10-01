@@ -14,6 +14,12 @@ namespace btcp.ECS.etc
             return (Activator.CreateInstance<T>() as ECSComponent);
         }
 
+        public int DeInitializeComponent(int entityID, ECSComponent component)
+        {
+            LogWarning();
+            return 0;
+        }
+
         public int InitializeComponent(int entityID, ECSComponent component)
         {
             LogWarning();

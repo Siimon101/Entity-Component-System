@@ -6,5 +6,6 @@ namespace btcp.ECS.interfaces
     {
         ECSComponent CreateComponent<T>();
         int InitializeComponent(int entityID, ECSComponent component);
+        int DeInitializeComponent(int entityID, ECSComponent component);
     }
 }

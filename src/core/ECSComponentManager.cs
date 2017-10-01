@@ -173,25 +173,33 @@ namespace btcp.ECS.core
             return m_componentIdentifiers.IndexOf(type);
         }
 
-        public ECSEntity RemoveComponent<T>(ECSEntity entity) where T : ECSComponent
+
+
+        internal void RemoveComponent<T>(int entityID)
         {
-            ECSDebug.Assert(entity != null, "Entity does not exist");
-
-            int componentID = GetComponentID(typeof(T));
-
-            OnComponentRemoved(entity.EntityID, GetComponentBag(entity.EntityID).Get(componentID));
-
-            GetComponentBag(entity.EntityID).Set(componentID, null);
-
-            return entity;
+            ECSComponent component = GetComponentBag(entityID).Get(GetComponentID(typeof(T)));
+            RemoveComponent(entityID, component);
         }
 
-
-        private void RemoveAllComponents(int v)
+        public void RemoveComponent(int entityID, ECSComponent component)
         {
-            Bag<ECSComponent> componentBag = GetComponentBag(v);
+            OnComponentRemoved(entityID, component);
+            m_componentFactory.DeInitializeComponent(entityID, component);
+            GetComponentBag(entityID).Set(GetComponentID(component.GetType()), null);
+        }
+
+        private void RemoveAllComponents(int entityID)
+        {
+            Bag<ECSComponent> componentBag = GetComponentBag(entityID);
+            componentBag.ResizeToFit();
+
+            foreach (ECSComponent component in componentBag.GetAll())
+            {
+                RemoveComponent(entityID, component);
+            }
+
             componentBag.Clear();
-            m_entityComponents.Remove(v);
+            m_entityComponents.Remove(entityID);
         }
 
 
