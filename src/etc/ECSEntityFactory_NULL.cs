@@ -1,10 +1,11 @@
+using System;
 using btcp.ECS.core;
 using btcp.ECS.interfaces;
 using btcp.ECS.utils;
 
 namespace btcp.ECS.etc
 {
-    public class EntityFactory_NULL : IECSEntityFactory
+    public class ECSEntityFactory_NULL : IECSEntityFactory
     {
 
         public Entity CreateEntity(string archetype)
@@ -14,7 +15,7 @@ namespace btcp.ECS.etc
 
         public Entity CreateEntity()
         {
-            ECSDebug.LogWarning("IECSEntityCreator was not provided.. Using NULLEntityCreator!");
+            ECSDebug.LogWarning("EntityFactory was not provided.. Using " + GetType().Name);
             return new Entity();
         }
 

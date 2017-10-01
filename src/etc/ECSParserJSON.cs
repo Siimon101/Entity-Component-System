@@ -161,7 +161,9 @@ namespace btcp.ECS.etc
 
                     foreach (var newValueKey in valueKeys)
                     {
-                        baseComponent[newValueKey].Add(newValueKey, newComponent[newValueKey].Value);
+                        baseComponent.Add(newValueKey, newComponent[newValueKey]);
+
+                        Debug.Log(replacedValues);
                     }
                 }
 
@@ -178,7 +180,11 @@ namespace btcp.ECS.etc
 
         public JSONNode GetArchetypeData(string v)
         {
-            return m_dataLocator.GetEntityContainer(m_parsedJSON)[v];
+            JSONNode data = m_dataLocator.GetEntityContainer(m_parsedJSON)[v];
+
+            ECSDebug.Assert(data != null, "Archetype not found " + v);
+
+            return data;
         }
 
     }

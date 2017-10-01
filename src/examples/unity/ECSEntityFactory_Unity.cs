@@ -10,20 +10,20 @@ using UnityEngine;
 
 namespace btcp.ECS.examples.unity
 {
-    public class EntityFactory_Unity : IECSEntityFactory
+    public class ECSEntityFactory_Unity : IECSEntityFactory
     {
         private ECSComponentManager m_componentManager;
         private ECSParserJSON m_parser;
         private IECSParserDataLocator m_dataLocator;
 
-        public EntityFactory_Unity(string json, ECSComponentManager componentManager)
+        public ECSEntityFactory_Unity(string json, ECSComponentManager componentManager)
         {
             m_componentManager = componentManager;
             m_dataLocator = new ECSParserDataLocator_Default();
             m_parser = new ECSParserJSON(m_dataLocator);
             m_parser.Provide(json);
         }
-        
+
         public Entity CreateEntity()
         {
             return new Entity();
@@ -64,7 +64,7 @@ namespace btcp.ECS.examples.unity
 
                     if (InitializeComponent(entity, component) == 0)
                     {
-                        ECSDebug.Log("Initialized Componet " + component);
+                        ECSDebug.Log("Initialized Component " + component);
                         m_componentManager.AddComponent(entity, component);
                         toInit.RemoveAt(i);
                     }
@@ -72,6 +72,8 @@ namespace btcp.ECS.examples.unity
                     attemptThreshold--;
                 }
             }
+
+            ECSDebug.Assert(attemptThreshold > 0, " Reached attempt threshold, maybe two components are dependent on eachother?");
         }
 
 

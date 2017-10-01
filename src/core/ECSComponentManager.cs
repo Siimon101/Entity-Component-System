@@ -91,7 +91,7 @@ namespace btcp.ECS.core
 
             int componentID = GetComponentID(typeof(T));
 
-            OnComponentRemoved(entity.EntityID,  GetComponentBag(entity.EntityID).Get(componentID));
+            OnComponentRemoved(entity.EntityID, GetComponentBag(entity.EntityID).Get(componentID));
 
             GetComponentBag(entity.EntityID).Set(componentID, null);
 
@@ -117,20 +117,20 @@ namespace btcp.ECS.core
         {
             if (HasComponentBag(entityID) == false)
             {
-                ECSDebug.LogWarning("Entity " + entityID + " does not have any components!");
+                ECSDebug.LogWarning("[HasComponent " + type.Name + "] Entity " + entityID + " does not have any components!");
                 return false;
             }
 
             Bag<ECSComponent> bag = GetComponentBag(entityID);
             if (GetComponentID(type) == -1)
             {
-                ECSDebug.LogWarning("Component not yet registered " + type.Name.ToString());
+                ECSDebug.LogWarning("[HasComponent " + type.Name + "] Component not yet registered " + type.Name.ToString());
                 return false;
             }
 
             if (bag.Get(GetComponentID(type)) == null)
             {
-                ECSDebug.LogWarning("Entity " + entityID + " does not have component " + type.Name.ToString() + " (Component ID : " + GetComponentID(type) + ")");
+                ECSDebug.LogWarning("[HasComponent " + type.Name + "] Entity " + entityID + " does not have component " + type.Name.ToString() + "(Component ID: " + GetComponentID(type) + ")");
                 return false;
             }
 

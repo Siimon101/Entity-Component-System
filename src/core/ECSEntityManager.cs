@@ -21,7 +21,7 @@ namespace btcp.ECS.core
         public ECSEntityManager()
         {
             m_entityBag = new Bag<Entity>();
-            m_entityFactory = new EntityFactory_NULL();
+            m_entityFactory = new ECSEntityFactory_NULL();
         }
 
         public void Provide(IECSEntityFactory factory)
