@@ -97,6 +97,10 @@ namespace btcp.ECS.core
                 }
             }
 
+
+            bag.Reset(toInit.Count);
+            bag.Add(toInit);
+
             ECSDebug.Assert(attemptThreshold > 0, " Reached attempt threshold, maybe two components are dependent on eachother?");
         }
 
