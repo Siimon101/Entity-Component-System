@@ -10,17 +10,17 @@ namespace btcp.ECS.core
     public class ECSEntityManager
     {
 
-        public delegate void EntityCallback(Entity e);
+        public delegate void EntityCallback(ECSEntity e);
         public event EntityCallback OnEntityCreated;
         public event EntityCallback OnEntityDestroyed;
 
-        private Bag<Entity> m_entityBag;
+        private Bag<ECSEntity> m_entityBag;
 
         private IECSEntityFactory m_entityFactory;
 
         public ECSEntityManager()
         {
-            m_entityBag = new Bag<Entity>();
+            m_entityBag = new Bag<ECSEntity>();
             m_entityFactory = new ECSEntityFactory_NULL();
         }
 
@@ -29,43 +29,51 @@ namespace btcp.ECS.core
             m_entityFactory = factory;
         }
 
-        ///<summary> Adds <see cref="Entity"/> to ECS </summary>
-        public Entity AddEntity(Entity entity)
+        ///<summary> Adds <see cref="ECSEntity"/> to ECS </summary>
+        public ECSEntity AddEntity(ECSEntity entity)
         {
             m_entityBag.Add(entity);
             entity.EntityID = m_entityBag.GetSize();
 
-            OnEntityCreated(entity);
+            if (OnEntityCreated != null)
+            {
+                OnEntityCreated(entity);
+            }
+
             return entity;
         }
 
-        ///<summary> Creates and adds <see cref="Entity"/> to ECS </summary>
-        internal Entity CreateEntity()
+        ///<summary> Creates and adds <see cref="ECSEntity"/> to ECS </summary>
+        internal ECSEntity CreateEntity()
         {
-            Entity e = m_entityFactory.CreateEntity();
+            ECSEntity e = m_entityFactory.CreateEntity();
             return AddEntity(e);
         }
 
-        ///<summary> Creates and adds <see cref="Entity"/> to ECS </summary>
-        internal Entity CreateEntity(string archetype)
+        ///<summary> Creates and adds <see cref="ECSEntity"/> to ECS </summary>
+        internal ECSEntity CreateEntity(string archetype)
         {
             return m_entityFactory.CreateEntity(archetype);
         }
 
-        public Entity GetEntity(int entityID)
+        public ECSEntity GetEntity(int entityID)
         {
             return m_entityBag.Get(entityID);
         }
 
         public void DestroyEntity(int entityID)
         {
-            OnEntityDestroyed(m_entityBag.Get(entityID));
+            if (OnEntityDestroyed != null)
+            {
+                OnEntityDestroyed(m_entityBag.Get(entityID));
+            }
+
             m_entityBag.Set(entityID, null);
         }
 
         public int[] GetEntityIdentifiers()
         {
-            List<Entity> validEntities = m_entityBag.GetValid();
+            List<ECSEntity> validEntities = m_entityBag.GetValid();
             int[] validEntityIdentifiers = new int[validEntities.Count];
 
             for (int i = 0; i < validEntities.Count; i++)

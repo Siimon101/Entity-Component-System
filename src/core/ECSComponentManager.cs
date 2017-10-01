@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Assets.Scripts.Utilities.MessageHandler;
+using btcp.ECS.etc;
+using btcp.ECS.interfaces;
 using btcp.ECS.utils;
 
 namespace btcp.ECS.core
@@ -14,25 +16,107 @@ namespace btcp.ECS.core
 
         private List<Type> m_componentIdentifiers;
         private Dictionary<int, Bag<ECSComponent>> m_entityComponents;
+        private Dictionary<int, Bag<ECSComponent>> m_pendingComponents;
+        private IECSComponentFactory m_componentFactory;
 
         public ECSComponentManager()
         {
             m_componentIdentifiers = new List<Type>();
             m_entityComponents = new Dictionary<int, Bag<ECSComponent>>();
+            m_pendingComponents = new Dictionary<int, Bag<ECSComponent>>();
+            m_componentFactory = new ECSComponentFactory_NULL();
         }
 
-        public ECSComponent AddComponent(Entity entity, ECSComponent component)
+        public void Provide(IECSComponentFactory factory)
         {
-            return AddComponent(entity.EntityID, component);
+            m_componentFactory = factory;
+        }
+
+        public ECSComponent CreateComponent<T>()
+        {
+            return m_componentFactory.CreateComponent<T>();
+        }
+
+        internal void CreateComponent<T>(int entityID)
+        {
+            ECSComponent component = CreateComponent<T>();
+            AddComponent(entityID, component);
+        }
+
+        public void AddComponents(int entityID, Bag<ECSComponent> components)
+        {
+            foreach (ECSComponent component in components)
+            {
+                AddComponent(entityID, component);
+            }
         }
 
         public ECSComponent AddComponent(int entityID, ECSComponent component)
         {
-            SafeGetComponentBag(entityID).Set(SafeGetComponentID(component.GetType()), component);
-
-            OnComponentAdded(entityID, component);
-            return component;
+            AddPendingComponent(entityID, component);
+            InitializePendingComponents(entityID);
+            return null;
         }
+
+        private void AddPendingComponent(int entityID, ECSComponent component)
+        {
+            SafeGetPendingComponentBag(entityID).Set(SafeGetComponentID(component.GetType()), component);
+        }
+
+        private void RemovePendingComponent(int entityID, ECSComponent component)
+        {
+            SafeGetPendingComponentBag(entityID).Set(GetComponentID(component.GetType()), null);
+        }
+
+        public void InitializePendingComponents(int entityID)
+        {
+            Bag<ECSComponent> bag = SafeGetPendingComponentBag(entityID);
+            bag.ResizeToFit();
+            List<ECSComponent> toInit = new List<ECSComponent>(bag.GetAll());
+            ECSComponent component = null;
+
+            int attemptThreshold = 10;
+
+
+            while (toInit.Count > 0 && attemptThreshold > 0)
+            {
+                for (int i = toInit.Count - 1; i >= 0; i--)
+                {
+                    component = toInit[i];
+
+                    if (m_componentFactory.InitializeComponent(entityID, component) == 0)
+                    {
+                        ECSDebug.Log("Initialized Component " + component);
+                        SafeGetComponentBag(entityID).Set(SafeGetComponentID(component.GetType()), component);
+                        OnComponentAdded(entityID, component);
+                        toInit.RemoveAt(i);
+                        continue;
+                    }
+
+                    attemptThreshold--;
+                }
+            }
+
+            ECSDebug.Assert(attemptThreshold > 0, " Reached attempt threshold, maybe two components are dependent on eachother?");
+        }
+
+
+
+        private Bag<ECSComponent> SafeGetPendingComponentBag(int entityID)
+        {
+            if (m_pendingComponents.ContainsKey(entityID) == false)
+            {
+                m_pendingComponents.Add(entityID, new Bag<ECSComponent>());
+            }
+
+            return GetPendingComponentBag(entityID);
+        }
+
+        private Bag<ECSComponent> GetPendingComponentBag(int entityID)
+        {
+            return m_pendingComponents[entityID];
+        }
+
 
         private Bag<ECSComponent> SafeGetComponentBag(int entityID)
         {
@@ -64,7 +148,7 @@ namespace btcp.ECS.core
             return GetComponentBag(entityID).Get(GetComponentID(typeof(T))) as T;
         }
 
-        public ECSComponent[] GetComponents(Entity entity)
+        public ECSComponent[] GetComponents(ECSEntity entity)
         {
             return SafeGetComponentBag(entity.EntityID).GetAll();
         }
@@ -85,7 +169,7 @@ namespace btcp.ECS.core
             return m_componentIdentifiers.IndexOf(type);
         }
 
-        public Entity RemoveComponent<T>(Entity entity) where T : ECSComponent
+        public ECSEntity RemoveComponent<T>(ECSEntity entity) where T : ECSComponent
         {
             ECSDebug.Assert(entity != null, "Entity does not exist");
 

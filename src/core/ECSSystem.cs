@@ -30,12 +30,12 @@ namespace btcp.ECS.core
             return m_queryManager.IsEntityValid(entityID);
         }
 
-        protected Entity CreateEntity()
+        protected ECSEntity CreateEntity()
         {
             return m_entityManager.CreateEntity();
         }
 
-        protected Entity CreateEntity(string archetype)
+        protected ECSEntity CreateEntity(string archetype)
         {
             return m_entityManager.CreateEntity(archetype);
         }

@@ -99,7 +99,7 @@ namespace btcp.ECS.core
 
         }
 
-        private void OnEntityDestroyed(Entity entity)
+        private void OnEntityDestroyed(ECSEntity entity)
         {
             int entityID = entity.EntityID;
             Bag<int> query = null;

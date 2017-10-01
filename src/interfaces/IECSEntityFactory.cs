@@ -4,7 +4,7 @@ namespace btcp.ECS.interfaces
 {
     public interface IECSEntityFactory
     {
-        Entity CreateEntity();
-        Entity CreateEntity(string archetype);
+        ECSEntity CreateEntity();
+        ECSEntity CreateEntity(string archetype);
     }
 }

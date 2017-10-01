@@ -24,14 +24,14 @@ namespace btcp.ECS.examples.unity
             m_parser.Provide(json);
         }
 
-        public Entity CreateEntity()
+        public ECSEntity CreateEntity()
         {
-            return new Entity();
+            return new ECSEntity();
         }
 
-        public Entity CreateEntity(string archetype)
+        public ECSEntity CreateEntity(string archetype)
         {
-            Entity e = CreateEntity();
+            ECSEntity e = CreateEntity();
 
             JSONNode archetypeData = m_parser.GetArchetypeData(archetype);
 
@@ -43,82 +43,11 @@ namespace btcp.ECS.examples.unity
             }
 
             Bag<ECSComponent> components = m_parser.ParseComponentData(archetypeData);
-            InitializeComponents(e, components);
+            m_componentManager.AddComponents(e.EntityID, components);
 
             return e;
         }
 
-        private void InitializeComponents(Entity entity, Bag<ECSComponent> components)
-        {
-            List<ECSComponent> toInit = new List<ECSComponent>(components.GetAll());
-            ECSComponent component = null;
 
-            int attemptThreshold = 10;
-
-
-            while (toInit.Count > 0 && attemptThreshold > 0)
-            {
-                for (int i = toInit.Count - 1; i >= 0; i--)
-                {
-                    component = toInit[i];
-
-                    if (InitializeComponent(entity, component) == 0)
-                    {
-                        ECSDebug.Log("Initialized Component " + component);
-                        m_componentManager.AddComponent(entity, component);
-                        toInit.RemoveAt(i);
-                    }
-
-                    attemptThreshold--;
-                }
-            }
-
-            ECSDebug.Assert(attemptThreshold > 0, " Reached attempt threshold, maybe two components are dependent on eachother?");
-        }
-
-
-        private int InitializeComponent(Entity entity, ECSComponent component)
-        {
-
-            if (component.GetType() == typeof(CTransform))
-            {
-                CTransform cTransform = component as CTransform;
-                cTransform.GameObject = new GameObject(cTransform.Name);
-            }
-
-            if (component.GetType() == typeof(CSpriteRenderer))
-            {
-                CSpriteRenderer cRenderer = component as CSpriteRenderer;
-
-                if (m_componentManager.HasComponent<CTransform>(entity.EntityID) == false)
-                {
-                    OnComponentInitializeFailure(component, "Cannot create sprite renderer without CTransform component!");
-                    return 1;
-                }
-
-                CTransform cTransform = m_componentManager.GetComponent<CTransform>(entity.EntityID);
-
-                if (cTransform.GameObject == null)
-                {
-                    OnComponentInitializeFailure(component, "GameObject does not exist!");
-                    return 1;
-                }
-
-                cRenderer.SpriteRenderer = cTransform.GameObject.GetComponentInChildren<SpriteRenderer>();
-
-                if (cRenderer.SpriteRenderer == null)
-                {
-                    cRenderer.SpriteRenderer = cTransform.GameObject.AddComponent<SpriteRenderer>();
-                }
-
-            }
-
-            return 0;
-        }
-
-        private void OnComponentInitializeFailure(ECSComponent component, string reason)
-        {
-            ECSDebug.LogError("Initializing Component " + component.GetType().Name + " failed. Reason: " + reason);
-        }
     }
 }

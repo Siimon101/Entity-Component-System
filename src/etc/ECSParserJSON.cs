@@ -162,8 +162,6 @@ namespace btcp.ECS.etc
                     foreach (var newValueKey in valueKeys)
                     {
                         baseComponent.Add(newValueKey, newComponent[newValueKey]);
-
-                        Debug.Log(replacedValues);
                     }
                 }
 
