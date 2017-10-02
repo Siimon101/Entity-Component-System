@@ -8,9 +8,10 @@ namespace btcp.ECS.etc
     public class ECSEntityFactory_NULL : IECSEntityFactory
     {
 
-        public ECSEntity CreateEntity(string archetype)
+        public ECSEntity SetupEntity(ECSEntity e, string archetype)
         {
-            return CreateEntity();
+            ECSDebug.LogWarning("EntityFactory was not provided.. Using " + GetType().Name);
+            return e;
         }
 
         public ECSEntity CreateEntity()

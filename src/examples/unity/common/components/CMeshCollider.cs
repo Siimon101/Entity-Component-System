@@ -6,6 +6,7 @@ namespace btcp.ECS.examples.unity.common.components
     public class CMeshCollider : ECSComponent
     {
         public MeshCollider MeshCollider;
+        public bool IsConvex = false;
 
     }
 }

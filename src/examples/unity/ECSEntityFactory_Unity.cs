@@ -29,9 +29,8 @@ namespace btcp.ECS.examples.unity
             return new ECSEntity();
         }
 
-        public ECSEntity CreateEntity(string archetype)
+        public ECSEntity SetupEntity(ECSEntity e, string archetype)
         {
-            ECSEntity e = CreateEntity();
 
             JSONNode archetypeData = m_parser.GetArchetypeData(archetype);
 
@@ -43,11 +42,25 @@ namespace btcp.ECS.examples.unity
             }
 
             Bag<ECSComponent> components = m_parser.ParseComponentData(archetypeData);
+            ComponentPreProcessing(archetype, components);
             m_componentManager.AddComponents(e.EntityID, components);
 
             return e;
         }
 
-
+        private void ComponentPreProcessing(string archetype, Bag<ECSComponent> components)
+        {
+            foreach (ECSComponent component in components)
+            {
+                if (component.GetType() == typeof(CTransform))
+                {
+                    CTransform cTransform = (component as CTransform);
+                    if (cTransform.Name == null)
+                    {
+                        cTransform.Name = archetype;
+                    }
+                }
+            }
+        }
     }
 }

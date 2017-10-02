@@ -33,24 +33,31 @@ namespace btcp.ECS.utils
 
         public int Has(T obj)
         {
-            Assert(obj != null, "Null object passed!");
-
-            for (int i = 0; i < m_size; i++)
+            if (obj == null)
             {
-                
-                if (m_data[i] == null)
-                {
-                    continue;
-                }
-
-                if (EqualityComparer<T>.Default.Equals(m_data[i], obj))
-                {
-                    return i;
-                }
+                LogError("Null object passed!");
+                return -1;
             }
+            else
+            {
 
-            LogWarning("Bag does not have an item " + obj.ToString());
-            return -1;
+                for (int i = 0; i < m_size; i++)
+                {
+
+                    if (m_data[i] == null)
+                    {
+                        continue;
+                    }
+
+                    if (EqualityComparer<T>.Default.Equals(m_data[i], obj))
+                    {
+                        return i;
+                    }
+                }
+
+                LogWarning("Bag does not have an item " + obj.ToString());
+                return -1;
+            }
         }
 
         public void Add(T obj)
@@ -252,10 +259,7 @@ namespace btcp.ECS.utils
 
         public void Assert(bool condition, object v)
         {
-            if (IsDebugOn)
-            {
-                ECSDebug.Assert(condition, v);
-            }
+            ECSDebug.Assert(condition, v);
         }
     }
 }

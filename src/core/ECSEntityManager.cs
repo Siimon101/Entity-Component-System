@@ -53,7 +53,9 @@ namespace btcp.ECS.core
         ///<summary> Creates and adds <see cref="ECSEntity"/> to ECS </summary>
         internal ECSEntity CreateEntity(string archetype)
         {
-            return m_entityFactory.CreateEntity(archetype);
+            ECSEntity e = CreateEntity();
+            m_entityFactory.SetupEntity(e, archetype);
+            return AddEntity(e);
         }
 
         public ECSEntity GetEntity(int entityID)

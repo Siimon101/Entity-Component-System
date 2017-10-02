@@ -4,6 +4,7 @@ using btcp.ECS.core;
 using btcp.ECS.examples.unity.common.components;
 using btcp.ECS.interfaces;
 using btcp.ECS.utils;
+using btcp.src.utils;
 using UnityEngine;
 
 namespace btcp.ECS.examples.unity
@@ -25,7 +26,6 @@ namespace btcp.ECS.examples.unity
 
         public virtual int InitializeComponent(int entityID, ECSComponent component)
         {
-
             if (component.GetType() == typeof(CTransform))
             {
                 CTransform cTransform = component as CTransform;
@@ -55,17 +55,10 @@ namespace btcp.ECS.examples.unity
             {
                 CSpriteRenderer cRenderer = component as CSpriteRenderer;
 
+                CTransform cTransform = VerifyTransform(cRenderer, entityID);
 
-                if (VerifyComponent<CTransform>(cRenderer, entityID) == 1)
+                if (cTransform == null)
                 {
-                    return 1;
-                }
-
-                CTransform cTransform = m_componentManager.GetComponent<CTransform>(entityID);
-
-                if (cTransform.GameObject == null)
-                {
-                    OnComponentInitializeFailure(component, "GameObject does not exist!");
                     return 1;
                 }
 
@@ -81,28 +74,116 @@ namespace btcp.ECS.examples.unity
 
             if (component.GetType() == typeof(CMeshCollider))
             {
-                CMeshCollider collider = m_componentManager.GetComponent<CMeshCollider>(entityID);
+                CMeshCollider collider = component as CMeshCollider;
 
-                if (VerifyComponent<CTransform>(collider, entityID) == 1)
+                CTransform cTransform = VerifyTransform(collider, entityID);
+
+                CMeshRenderer cMeshRenderer = GetComponent<CMeshRenderer>(collider, entityID);
+
+                if (cMeshRenderer == null)
                 {
                     return 1;
                 }
 
+                if (cMeshRenderer.MeshFilter == null)
+                {
+                    OnComponentInitializeFailure(collider, "Cannot create mesh collider without mesh filter");
+                    return 1;
+                }
 
+                if (collider.MeshCollider == null)
+                {
+                    collider.MeshCollider = cTransform.GameObject.GetComponent<MeshCollider>();
+
+                    if (collider.MeshCollider == null)
+                    {
+                        collider.MeshCollider = cTransform.GameObject.AddComponent<MeshCollider>();
+                    }
+
+                    collider.MeshCollider.sharedMesh = null;
+                    collider.MeshCollider.sharedMesh = cMeshRenderer.MeshFilter.mesh;
+
+                    if (collider.IsConvex)
+                    {
+                        collider.MeshCollider.convex = true;
+                    }
+                }
+            }
+
+            if (component.GetType() == typeof(CMeshRenderer))
+            {
+                CMeshRenderer meshRenderer = component as CMeshRenderer;
+
+                CTransform cTransform = VerifyTransform(meshRenderer, entityID);
+
+                if (cTransform == null)
+                {
+                    return 1;
+                }
+
+                if (meshRenderer.MeshRenderer == null)
+                {
+                    meshRenderer.MeshRenderer = cTransform.GameObject.GetComponent<MeshRenderer>();
+
+                    if (meshRenderer.MeshRenderer == null)
+                    {
+                        meshRenderer.MeshRenderer = cTransform.GameObject.AddComponent<MeshRenderer>();
+                    }
+
+                    if (meshRenderer.MaterialID != null && (meshRenderer.MeshRenderer.material == null || meshRenderer.MeshRenderer.material.name != meshRenderer.MaterialID))
+                    {
+                        meshRenderer.MeshRenderer.material = ResourceManager.GetInstance().Get<Material>(meshRenderer.MaterialID);
+                    }
+                }
+
+
+                if (meshRenderer.MeshFilter == null)
+                {
+                    meshRenderer.MeshFilter = cTransform.GameObject.GetComponent<MeshFilter>();
+
+                    if (meshRenderer.MeshFilter == null)
+                    {
+                        meshRenderer.MeshFilter = cTransform.GameObject.AddComponent<MeshFilter>();
+                    }
+
+                    if (meshRenderer.MeshID != null && (meshRenderer.MeshFilter.mesh == null || meshRenderer.MeshFilter.mesh.name != meshRenderer.MeshID))
+                    {
+                        Mesh mesh = ResourceManager.GetInstance().Get<Mesh>(meshRenderer.MeshID);
+                        meshRenderer.MeshFilter.mesh = mesh;
+                    }
+                }
             }
 
             return 0;
         }
 
-        private int VerifyComponent<T>(ECSComponent component, int entityID)
+        private CTransform VerifyTransform(ECSComponent component, int entityID)
+        {
+            CTransform cTransform = GetComponent<CTransform>(component, entityID);
+
+            if (cTransform == null)
+            {
+                return null;
+            }
+
+            if (cTransform.GameObject == null)
+            {
+                OnComponentInitializeFailure(component, "GameObject does not exist!");
+                return null;
+            }
+
+            return cTransform;
+        }
+
+        private T GetComponent<T>(ECSComponent component, int entityID) where T : ECSComponent
         {
             if (m_componentManager.HasComponent<T>(entityID) == false)
             {
                 OnComponentInitializeFailure(component, "Cannot initialize component " + component.GetType().Name + " without component " + typeof(T).Name);
-                return 1;
+                return null;
             }
 
-            return 0;
+            return m_componentManager.GetComponent<T>(entityID);
         }
 
         public virtual int DeInitializeComponent(int entityID, ECSComponent component)

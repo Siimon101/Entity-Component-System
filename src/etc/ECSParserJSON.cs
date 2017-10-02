@@ -98,13 +98,13 @@ namespace btcp.ECS.etc
         {
             Bag<ECSComponent> components = new Bag<ECSComponent>();
             JSONNode data = null;
-
             JSONNode componentDataArray = m_dataLocator.GetComponentData(archetypeData);
             Type componentType = null;
 
             for (int i = 0; i < componentDataArray.Count; i++)
             {
                 data = componentDataArray[i];
+
                 componentType = GetComponentTypeByName(m_dataLocator.GetComponentName(data));
 
                 if (componentType == null)

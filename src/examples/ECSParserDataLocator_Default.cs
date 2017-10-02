@@ -1,4 +1,5 @@
 using btcp.ECS.interfaces;
+using btcp.ECS.utils;
 using SimpleJSON;
 
 namespace btcp.ECS.examples
@@ -17,8 +18,11 @@ namespace btcp.ECS.examples
 
         public string GetComponentName(JSONNode componentData)
         {
-            return componentData["ComponentName"];
+            string componentName = componentData["ComponentName"];
+            ECSDebug.Assert(componentName != null, "Validate JSON file, might have misspelt 'ComponentName'");
+            return componentName;
         }
+
 
         public JSONNode GetEntityContainer(JSONNode parentNode)
         {
