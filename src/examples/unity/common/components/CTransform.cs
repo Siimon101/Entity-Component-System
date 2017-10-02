@@ -12,6 +12,8 @@ namespace btcp.ECS.examples.unity.common.components
         public string Name;
         public GameObject GameObject;
 
+        public int LayerID;
+
         ///The path of the prefab (must be located in Resources folder)
         public string PrefabID;
 

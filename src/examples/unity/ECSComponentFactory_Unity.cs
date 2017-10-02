@@ -48,7 +48,9 @@ namespace btcp.ECS.examples.unity
 
                         cTransform.GameObject = GameObject.Instantiate(prefab);
                     }
+
                 }
+                cTransform.GameObject.layer = cTransform.LayerID;
             }
 
             if (component.GetType() == typeof(CSpriteRenderer))
@@ -62,13 +64,21 @@ namespace btcp.ECS.examples.unity
                     return 1;
                 }
 
-                cRenderer.SpriteRenderer = cTransform.GameObject.GetComponentInChildren<SpriteRenderer>();
+                cRenderer.SpriteRenderer = AddOrGetUnityComponent<SpriteRenderer>(cTransform);
+            }
 
-                if (cRenderer.SpriteRenderer == null)
+            if (component.GetType() == typeof(CRigidbody))
+            {
+                CRigidbody cRigidbody = component as CRigidbody;
+
+                CTransform cTransform = VerifyTransform(cRigidbody, entityID);
+
+                if (cTransform == null)
                 {
-                    cRenderer.SpriteRenderer = cTransform.GameObject.AddComponent<SpriteRenderer>();
+                    return 1;
                 }
 
+                cRigidbody.RigidBody = AddOrGetUnityComponent<Rigidbody>(cTransform);
             }
 
 
@@ -91,22 +101,35 @@ namespace btcp.ECS.examples.unity
                     return 1;
                 }
 
-                if (collider.MeshCollider == null)
+                if (collider.Collider == null)
                 {
-                    collider.MeshCollider = cTransform.GameObject.GetComponent<MeshCollider>();
+                    collider.Collider = AddOrGetUnityComponent<MeshCollider>(cTransform);
 
-                    if (collider.MeshCollider == null)
-                    {
-                        collider.MeshCollider = cTransform.GameObject.AddComponent<MeshCollider>();
-                    }
-
-                    collider.MeshCollider.sharedMesh = null;
-                    collider.MeshCollider.sharedMesh = cMeshRenderer.MeshFilter.mesh;
+                    collider.Collider.sharedMesh = null;
+                    collider.Collider.sharedMesh = cMeshRenderer.MeshFilter.mesh;
 
                     if (collider.IsConvex)
                     {
-                        collider.MeshCollider.convex = true;
+                        collider.Collider.convex = true;
                     }
+                }
+            }
+
+            if (component.GetType() == typeof(CSphereCollider))
+            {
+                CSphereCollider cSphereCollider = component as CSphereCollider;
+
+                CTransform cTransform = VerifyTransform(cSphereCollider, entityID);
+
+
+                if (cTransform == null)
+                {
+                    return 1;
+                }
+
+                if (cSphereCollider.Collider == null)
+                {
+                    cSphereCollider.Collider = AddOrGetUnityComponent<SphereCollider>(cTransform);
                 }
             }
 
@@ -123,14 +146,7 @@ namespace btcp.ECS.examples.unity
 
                 if (meshRenderer.MeshRenderer == null)
                 {
-                    meshRenderer.MeshRenderer = cTransform.GameObject.GetComponent<MeshRenderer>();
-
-                    Debug.Log(meshRenderer.MeshRenderer);
-
-                    if (meshRenderer.MeshRenderer == null)
-                    {
-                        meshRenderer.MeshRenderer = cTransform.GameObject.AddComponent<MeshRenderer>();
-                    }
+                    meshRenderer.MeshRenderer = AddOrGetUnityComponent<MeshRenderer>(cTransform);
 
                     if (meshRenderer.MaterialID != null && (meshRenderer.MeshRenderer.material == null || meshRenderer.MeshRenderer.material.name != meshRenderer.MaterialID))
                     {
@@ -141,12 +157,7 @@ namespace btcp.ECS.examples.unity
 
                 if (meshRenderer.MeshFilter == null)
                 {
-                    meshRenderer.MeshFilter = cTransform.GameObject.GetComponent<MeshFilter>();
-
-                    if (meshRenderer.MeshFilter == null)
-                    {
-                        meshRenderer.MeshFilter = cTransform.GameObject.AddComponent<MeshFilter>();
-                    }
+                    meshRenderer.MeshFilter = AddOrGetUnityComponent<MeshFilter>(cTransform);
 
                     if (meshRenderer.MeshID != null && (meshRenderer.MeshFilter.mesh == null || meshRenderer.MeshFilter.mesh.name != meshRenderer.MeshID))
                     {
@@ -157,6 +168,18 @@ namespace btcp.ECS.examples.unity
             }
 
             return 0;
+        }
+
+        private T AddOrGetUnityComponent<T>(CTransform cTransform) where T : Component
+        {
+            T component = cTransform.GameObject.GetComponent<T>();
+
+            if (component == null)
+            {
+                component = cTransform.GameObject.AddComponent<T>();
+            }
+
+            return component;
         }
 
         private CTransform VerifyTransform(ECSComponent component, int entityID)
@@ -195,55 +218,64 @@ namespace btcp.ECS.examples.unity
             if (component.GetType() == typeof(CTransform))
             {
                 CTransform cTransform = component as CTransform;
-
-                if (cTransform.GameObject)
-                {
-                    GameObject.Destroy(cTransform.GameObject);
-                }
+                DestroyUnityComponent<Transform>(entityID, component);
             }
 
             if (component.GetType() == typeof(CSpriteRenderer))
             {
                 CSpriteRenderer cRenderer = component as CSpriteRenderer;
-
-                CTransform cTransform = VerifyTransform(cRenderer, entityID);
-
-                if (cTransform == null)
-                {
-                    return 1;
-                }
-
-                if (cRenderer.SpriteRenderer == null)
-                {
-                    OnComponentDeInitializeFailure(component, "Sprite Renderer not found!");
-                    return 1;
-                }
-
-                GameObject.Destroy(cRenderer.SpriteRenderer);
+                DestroyUnityComponent<SpriteRenderer>(entityID, cRenderer);
             }
 
 
             if (component.GetType() == typeof(CMeshCollider))
             {
                 CMeshCollider cMeshCollider = component as CMeshCollider;
-
-                CTransform cTransform = VerifyTransform(cMeshCollider, entityID);
-
-                if (cTransform == null)
-                {
-                    return 1;
-                }
-
-                if (cMeshCollider.MeshCollider == null)
-                {
-                    OnComponentDeInitializeFailure(component, "Mesh Collider not found!");
-                    return 1;
-                }
-
-                GameObject.Destroy(cMeshCollider.MeshCollider);
+                DestroyUnityComponent<MeshCollider>(entityID, cMeshCollider);
+                GameObject.Destroy(cMeshCollider.Collider);
             }
 
 
+
+            if (component.GetType() == typeof(CRigidbody))
+            {
+                CRigidbody cRigidbody = component as CRigidbody;
+                DestroyUnityComponent<Rigidbody>(entityID, cRigidbody);
+            }
+
+
+
+            if (component.GetType() == typeof(CMeshRenderer))
+            {
+                CMeshRenderer cMeshRenderer = component as CMeshRenderer;
+                DestroyUnityComponent<MeshRenderer>(entityID, cMeshRenderer);
+                DestroyUnityComponent<MeshFilter>(entityID, cMeshRenderer);
+            }
+
+
+            return 0;
+        }
+
+
+        private int DestroyUnityComponent<T>(int entityID, ECSComponent component) where T : Component
+        {
+            CTransform cTransform = VerifyTransform(component, entityID);
+
+            if (cTransform == null)
+            {
+                OnComponentDeInitializeFailure(component, "Transform not found.");
+                return 1;
+            }
+
+            T unityComponent = cTransform.GameObject.GetComponent<T>();
+
+            if (component == null)
+            {
+                OnComponentDeInitializeFailure(component, "Unity component not found on transform " + typeof(T));
+                return 1;
+            }
+
+            GameObject.Destroy(unityComponent);
             return 0;
         }
 
