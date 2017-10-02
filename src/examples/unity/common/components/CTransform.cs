@@ -13,7 +13,7 @@ namespace btcp.ECS.examples.unity.common.components
         public GameObject GameObject;
 
         ///The path of the prefab (must be located in Resources folder)
-        public string PrefabPath;
+        public string PrefabID;
 
         public CTransform()
         {

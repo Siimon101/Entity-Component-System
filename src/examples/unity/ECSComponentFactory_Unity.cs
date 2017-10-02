@@ -32,17 +32,17 @@ namespace btcp.ECS.examples.unity
 
                 if (cTransform.GameObject == null)
                 {
-                    if (cTransform.PrefabPath == null)
+                    if (cTransform.PrefabID == null)
                     {
                         cTransform.GameObject = new GameObject(cTransform.Name);
                     }
                     else
                     {
-                        GameObject prefab = Resources.Load<GameObject>(cTransform.PrefabPath);
+                        GameObject prefab = Resources.Load<GameObject>(cTransform.PrefabID);
 
                         if (prefab == null)
                         {
-                            OnComponentInitializeFailure(cTransform, "Prefab could not be found " + cTransform.PrefabPath);
+                            OnComponentInitializeFailure(cTransform, "Prefab could not be found " + cTransform.PrefabID);
                             return 1;
                         }
 
@@ -125,6 +125,8 @@ namespace btcp.ECS.examples.unity
                 {
                     meshRenderer.MeshRenderer = cTransform.GameObject.GetComponent<MeshRenderer>();
 
+                    Debug.Log(meshRenderer.MeshRenderer);
+
                     if (meshRenderer.MeshRenderer == null)
                     {
                         meshRenderer.MeshRenderer = cTransform.GameObject.AddComponent<MeshRenderer>();
@@ -204,17 +206,10 @@ namespace btcp.ECS.examples.unity
             {
                 CSpriteRenderer cRenderer = component as CSpriteRenderer;
 
-                if (m_componentManager.HasComponent<CTransform>(entityID) == false)
-                {
-                    OnComponentDeInitializeFailure(component, "Cannot remove sprite renderer without CTransform component!");
-                    return 1;
-                }
+                CTransform cTransform = VerifyTransform(cRenderer, entityID);
 
-                CTransform cTransform = m_componentManager.GetComponent<CTransform>(entityID);
-
-                if (cTransform.GameObject == null)
+                if (cTransform == null)
                 {
-                    OnComponentDeInitializeFailure(component, "Entity does not have GameObject!");
                     return 1;
                 }
 
@@ -226,6 +221,28 @@ namespace btcp.ECS.examples.unity
 
                 GameObject.Destroy(cRenderer.SpriteRenderer);
             }
+
+
+            if (component.GetType() == typeof(CMeshCollider))
+            {
+                CMeshCollider cMeshCollider = component as CMeshCollider;
+
+                CTransform cTransform = VerifyTransform(cMeshCollider, entityID);
+
+                if (cTransform == null)
+                {
+                    return 1;
+                }
+
+                if (cMeshCollider.MeshCollider == null)
+                {
+                    OnComponentDeInitializeFailure(component, "Mesh Collider not found!");
+                    return 1;
+                }
+
+                GameObject.Destroy(cMeshCollider.MeshCollider);
+            }
+
 
             return 0;
         }

@@ -55,7 +55,7 @@ namespace btcp.ECS.core
         {
             ECSEntity e = CreateEntity();
             m_entityFactory.SetupEntity(e, archetype);
-            return AddEntity(e);
+            return e;
         }
 
         public ECSEntity GetEntity(int entityID)
