@@ -130,6 +130,11 @@ namespace btcp.ECS.examples.unity
                 if (cSphereCollider.Collider == null)
                 {
                     cSphereCollider.Collider = AddOrGetUnityComponent<SphereCollider>(cTransform);
+
+                    if(cSphereCollider.PhysicsMaterialID != null && (cSphereCollider.Collider.material == null || cSphereCollider.Collider.material.name != cSphereCollider.PhysicsMaterialID))
+                    {
+                        cSphereCollider.Collider.material = ResourceManager.GetInstance().Get<PhysicMaterial>(cSphereCollider.PhysicsMaterialID);
+                    }
                 }
             }
 
@@ -152,6 +157,7 @@ namespace btcp.ECS.examples.unity
                     {
                         meshRenderer.MeshRenderer.material = ResourceManager.GetInstance().Get<Material>(meshRenderer.MaterialID);
                     }
+
                 }
 
 

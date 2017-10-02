@@ -9,6 +9,8 @@ namespace btcp.ECS.core
 
         private ECSQueryManager m_queryManager;
         private ECSEntityManager m_entityManager;
+
+        public int UpdatePriority { get; set; }
         internal void Provide(ECSQueryManager queryManager, ECSEntityManager entityManager)
         {
             m_queryManager = queryManager;

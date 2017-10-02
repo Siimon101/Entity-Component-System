@@ -11,9 +11,9 @@ namespace btcp.ECS.core
 
         private ECSQueryManager m_queryManager;
         private ECSEntityManager m_entityManager;
-
         private List<Type> m_systemIdentifiers;
         private Bag<ECSSystem> m_systems;
+        private List<ECSSystem> m_sortedSystems;
 
         public ECSSystemManager()
         {
@@ -29,13 +29,26 @@ namespace btcp.ECS.core
 
         public void CreateSystem(ECSSystem system)
         {
-            m_systems.Add(system);
+            m_systems.Set(SafeGetSystemID(system.GetType()), system);
             system.Provide(m_queryManager, m_entityManager);
+            SortSystems();
         }
 
         public void RemoveSystem<T>() where T : ECSSystem
         {
             m_systems.Set(GetSystemID(typeof(T)), null);
+            SortSystems();
+        }
+
+        internal void SetSystemPriority<T>(int v) where T : ECSSystem
+        {
+            GetSystem<T>().UpdatePriority = v;
+            SortSystems();
+        }
+
+        public T GetSystem<T>() where T : ECSSystem
+        {
+            return m_systems.Get(GetSystemID(typeof(T))) as T;
         }
 
 
@@ -56,7 +69,7 @@ namespace btcp.ECS.core
 
         public void Update()
         {
-            foreach (ECSSystem system in m_systems)
+            foreach (ECSSystem system in m_sortedSystems)
             {
                 system.Update();
             }
@@ -64,7 +77,7 @@ namespace btcp.ECS.core
 
         public void FixedUpdate()
         {
-            foreach (ECSSystem system in m_systems)
+            foreach (ECSSystem system in m_sortedSystems)
             {
                 system.FixedUpdate();
             }
@@ -72,9 +85,52 @@ namespace btcp.ECS.core
 
         public void LateUpdate()
         {
-            foreach (ECSSystem system in m_systems)
+            foreach (ECSSystem system in m_sortedSystems)
             {
                 system.LateUpdate();
+            }
+        }
+
+        private void SortSystems()
+        {
+            m_sortedSystems = new List<ECSSystem>();
+
+            List<ECSSystem> systems = new List<ECSSystem>(m_systems.GetAll());
+
+            for (int i = systems.Count - 1; i >= 0; i--)
+            {
+                if (systems[i] == null)
+                {
+                    systems.RemoveAt(i);
+                }
+            }
+
+            int highestPriority = int.MinValue;
+            ECSSystem highestPriotitySystem = null;
+
+            while (systems.Count > 0)
+            {
+
+                highestPriority = int.MinValue;
+                highestPriotitySystem = null;
+
+                foreach (ECSSystem system in systems)
+                {
+
+                    if (system.UpdatePriority > highestPriority)
+                    {
+                        highestPriority = system.UpdatePriority;
+                        highestPriotitySystem = system;
+                    }
+                }
+
+                systems.Remove(highestPriotitySystem);
+                m_sortedSystems.Add(highestPriotitySystem);
+            }
+
+            for (int i = 0; i < m_sortedSystems.Count; i++)
+            {
+                ECSDebug.Log(i + " - " + m_sortedSystems[i]);
             }
         }
     }

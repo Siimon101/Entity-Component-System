@@ -7,6 +7,6 @@ namespace btcp.ECS.examples.unity.common.components
     {
 
         public SphereCollider Collider;
-
+        public string PhysicsMaterialID;
     }
 }

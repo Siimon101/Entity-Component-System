@@ -7,7 +7,7 @@ namespace btcp.ECS.examples.unity.common.systems
     public class STransform : ECSSystem
     {
 
-        internal override void Update()
+        internal override void LateUpdate()
         {
             int[] entities = GetEntitiesWithComponents(typeof(CTransform));
 
