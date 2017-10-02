@@ -1,7 +1,7 @@
 using btcp.ECS.core;
 using UnityEngine;
 
-namespace btcp.ECS.examples.unity.components
+namespace btcp.ECS.examples.unity.common.components
 {
     public class CTransform : ECSComponent
     {
@@ -11,6 +11,9 @@ namespace btcp.ECS.examples.unity.components
 
         public string Name;
         public GameObject GameObject;
+
+        ///The path of the prefab (must be located in Resources folder)
+        public string PrefabPath;
 
         public CTransform()
         {

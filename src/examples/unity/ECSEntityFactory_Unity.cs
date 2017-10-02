@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using btcp.ECS.core;
 using btcp.ECS.etc;
-using btcp.ECS.examples.unity.components;
+using btcp.ECS.examples.unity.common.components;
 using btcp.ECS.interfaces;
 using btcp.ECS.utils;
 using SimpleJSON;
