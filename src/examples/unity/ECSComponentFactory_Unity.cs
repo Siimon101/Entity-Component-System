@@ -113,6 +113,8 @@ namespace btcp.ECS.examples.unity
                         collider.Collider.convex = true;
                     }
                 }
+
+                OnColliderAttached(collider.Collider, entityID);
             }
 
             if (component.GetType() == typeof(CSphereCollider))
@@ -131,11 +133,13 @@ namespace btcp.ECS.examples.unity
                 {
                     cSphereCollider.Collider = AddOrGetUnityComponent<SphereCollider>(cTransform);
 
-                    if(cSphereCollider.PhysicsMaterialID != null && (cSphereCollider.Collider.material == null || cSphereCollider.Collider.material.name != cSphereCollider.PhysicsMaterialID))
+                    if (cSphereCollider.PhysicsMaterialID != null && (cSphereCollider.Collider.material == null || cSphereCollider.Collider.material.name != cSphereCollider.PhysicsMaterialID))
                     {
                         cSphereCollider.Collider.material = ResourceManager.GetInstance().Get<PhysicMaterial>(cSphereCollider.PhysicsMaterialID);
                     }
                 }
+
+                OnColliderAttached(cSphereCollider.Collider, entityID);
             }
 
             if (component.GetType() == typeof(CMeshRenderer))
@@ -174,6 +178,16 @@ namespace btcp.ECS.examples.unity
             }
 
             return 0;
+        }
+
+        private void OnColliderAttached(Collider unityCollider, int entityID)
+        {
+            if (m_componentManager.HasComponent<CCollider>(entityID) == false)
+            {
+                CCollider newCollider = new CCollider();
+                newCollider.Collider = unityCollider;
+                m_componentManager.AddComponent(entityID, newCollider);
+            }
         }
 
         private T AddOrGetUnityComponent<T>(CTransform cTransform) where T : Component
