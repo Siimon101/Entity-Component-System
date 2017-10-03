@@ -79,7 +79,8 @@ namespace btcp.ECS.core
 
             ECSComponent component = null;
 
-            int attemptThreshold = 10;
+            int START_THRESHOLD = 10;
+            int attemptThreshold = START_THRESHOLD;
 
             for (int i = toInit.Count - 1; i >= 0; i--)
             {
@@ -89,7 +90,7 @@ namespace btcp.ECS.core
                 }
             }
 
-            while (toInit.Count > 0 && attemptThreshold > 0)
+            while ((toInit.Count > 0 && attemptThreshold == START_THRESHOLD) || (toInit.Count > 1 && attemptThreshold > 0))
             {
                 for (int i = toInit.Count - 1; i >= 0; i--)
                 {

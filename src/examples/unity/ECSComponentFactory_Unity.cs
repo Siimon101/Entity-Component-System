@@ -50,7 +50,11 @@ namespace btcp.ECS.examples.unity
                     }
 
                 }
+
                 cTransform.GameObject.layer = cTransform.LayerID;
+                cTransform.X = cTransform.GameObject.transform.position.x;
+                cTransform.Y = cTransform.GameObject.transform.position.y;
+                cTransform.Z = cTransform.GameObject.transform.position.z;
             }
 
             if (component.GetType() == typeof(CSpriteRenderer))
@@ -80,6 +84,22 @@ namespace btcp.ECS.examples.unity
 
                 cRigidbody.RigidBody = AddOrGetUnityComponent<Rigidbody>(cTransform);
             }
+
+            if (component.GetType() == typeof(CBoxCollider))
+            {
+                CBoxCollider cBoxCollider = component as CBoxCollider;
+
+                CTransform cTransform = VerifyTransform(cBoxCollider, entityID);
+
+                if (cTransform == null)
+                {
+                    return 1;
+                }
+
+                cBoxCollider.BoxCollider = AddOrGetUnityComponent<BoxCollider>(cTransform);
+                OnColliderAdded(cBoxCollider.BoxCollider, entityID);
+            }
+
 
 
             if (component.GetType() == typeof(CMeshCollider))
@@ -246,21 +266,23 @@ namespace btcp.ECS.examples.unity
                 DestroyUnityComponent<SpriteRenderer>(entityID, cRenderer);
             }
 
+            if (component.GetType() == typeof(CBoxCollider))
+            {
+                CBoxCollider cBoxCollider = component as CBoxCollider;
+                DestroyUnityComponent<BoxCollider>(entityID, cBoxCollider);
+            }
 
             if (component.GetType() == typeof(CMeshCollider))
             {
                 CMeshCollider cMeshCollider = component as CMeshCollider;
                 DestroyUnityComponent<MeshCollider>(entityID, cMeshCollider);
-                GameObject.Destroy(cMeshCollider.Collider);
             }
 
             if (component.GetType() == typeof(CSphereCollider))
             {
                 CSphereCollider cSphereCollider = component as CSphereCollider;
                 DestroyUnityComponent<SphereCollider>(entityID, cSphereCollider);
-                GameObject.Destroy(cSphereCollider.Collider);
             }
-
 
 
             if (component.GetType() == typeof(CRigidbody))
@@ -268,7 +290,6 @@ namespace btcp.ECS.examples.unity
                 CRigidbody cRigidbody = component as CRigidbody;
                 DestroyUnityComponent<Rigidbody>(entityID, cRigidbody);
             }
-
 
 
             if (component.GetType() == typeof(CMeshRenderer))

@@ -64,27 +64,27 @@ namespace btcp.ECS.core
         }
 
 
-        protected void Log(string v)
+        protected void Log(object v)
         {
             ECSDebug.Log(SYSTEM_LOG_PREFIX + v);
         }
 
-        protected void LogWarning(string v)
+        protected void LogWarning(object v)
         {
             ECSDebug.LogWarning(SYSTEM_LOG_PREFIX + v);
         }
 
-        protected void LogError(string v)
+        protected void LogError(object v)
         {
             ECSDebug.LogError(SYSTEM_LOG_PREFIX + v);
         }
 
-        protected void LogForce(string v)
+        protected void LogForce(object v)
         {
             ECSDebug.LogForce(v);
         }
 
-        protected void Assert(bool condition, string v)
+        protected void Assert(bool condition, object v)
         {
             ECSDebug.Assert(condition, SYSTEM_LOG_PREFIX + v);
         }
