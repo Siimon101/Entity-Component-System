@@ -74,9 +74,9 @@ namespace btcp.ECS.etc
 
             foreach (string componentName in componentNames)
             {
-                foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+                foreach (var pair in m_assemblyTypes)
                 {
-                    Type[] allTypes = m_assemblyTypes[assembly];
+                    Type[] allTypes = pair.Value;
 
                     foreach (Type type in allTypes)
                     {
