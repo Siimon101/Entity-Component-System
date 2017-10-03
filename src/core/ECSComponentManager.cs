@@ -78,7 +78,7 @@ namespace btcp.ECS.core
             int attemptThreshold = 10;
 
 
-            while (toInit.Count > 0 && attemptThreshold > 0)
+            while (toInit.Count > 0 && (toInit.Count > 1 && attemptThreshold > 0))
             {
                 for (int i = toInit.Count - 1; i >= 0; i--)
                 {
@@ -211,22 +211,21 @@ namespace btcp.ECS.core
 
         public bool HasComponent(int entityID, Type type)
         {
-            if (HasComponentBag(entityID) == false)
-            {
-                ECSDebug.LogWarning("[HasComponent " + type.Name + "] Entity " + entityID + " does not have any components!");
-                return false;
-            }
-
-            Bag<ECSComponent> bag = GetComponentBag(entityID);
             if (GetComponentID(type) == -1)
             {
                 ECSDebug.LogWarning("[HasComponent " + type.Name + "] Component not yet registered " + type.Name.ToString());
                 return false;
             }
 
+            if (HasComponentBag(entityID) == false)
+            {
+                return false;
+            }
+
+            Bag<ECSComponent> bag = GetComponentBag(entityID);
+
             if (bag.Get(GetComponentID(type)) == null)
             {
-                ECSDebug.LogWarning("[HasComponent " + type.Name + "] Entity " + entityID + " does not have component " + type.Name.ToString() + "(Component ID: " + GetComponentID(type) + ")");
                 return false;
             }
 
