@@ -6,5 +6,6 @@ namespace btcp.ECS.interfaces
     {
         ECSEntity CreateEntity();
         ECSEntity SetupEntity(ECSEntity e, string archetype);
+        void DestroyEntity(ECSEntity entity);
     }
 }

@@ -67,7 +67,6 @@ namespace btcp.ECS.utils
                 IncreaseCapacity(m_size + 1);
             }
 
-            Log("Added item " + obj);
             m_data[m_size++] = obj;
         }
 

@@ -20,7 +20,7 @@ namespace btcp.ECS.core
 
         public ECSEntityManager()
         {
-            m_entityBag = new Bag<ECSEntity>();
+            m_entityBag = new Bag<ECSEntity>(1);
             m_entityFactory = new ECSEntityFactory_NULL();
         }
 
@@ -32,8 +32,9 @@ namespace btcp.ECS.core
         ///<summary> Adds <see cref="ECSEntity"/> to ECS </summary>
         public ECSEntity AddEntity(ECSEntity entity)
         {
-            m_entityBag.Add(entity);
-            entity.EntityID = m_entityBag.GetSize();
+            int entityID = m_entityBag.GetSize() + 1;
+            m_entityBag.Set(entityID, entity);
+            entity.EntityID = entityID;
 
             if (OnEntityCreated != null)
             {
@@ -65,11 +66,14 @@ namespace btcp.ECS.core
 
         public void DestroyEntity(int entityID)
         {
+            ECSEntity entity = m_entityBag.Get(entityID);
+
             if (OnEntityDestroyed != null)
             {
-                OnEntityDestroyed(m_entityBag.Get(entityID));
+                OnEntityDestroyed(entity);
             }
 
+            m_entityFactory.DestroyEntity(entity);
             m_entityBag.Set(entityID, null);
         }
 

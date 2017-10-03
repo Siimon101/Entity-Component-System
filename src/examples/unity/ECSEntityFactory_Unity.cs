@@ -29,6 +29,11 @@ namespace btcp.ECS.examples.unity
             return new ECSEntity();
         }
 
+        public void DestroyEntity(ECSEntity entity)
+        {
+            m_componentManager.RemoveAllComponents(entity.EntityID);
+        }
+
         public ECSEntity SetupEntity(ECSEntity e, string archetype)
         {
 

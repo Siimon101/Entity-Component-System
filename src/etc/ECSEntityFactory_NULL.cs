@@ -20,5 +20,9 @@ namespace btcp.ECS.etc
             return new ECSEntity();
         }
 
+        public void DestroyEntity(ECSEntity entity)
+        {
+            ECSDebug.LogWarning("EntityFactory was not provided.. Using " + GetType().Name);
+        }
     }
 }

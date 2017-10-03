@@ -60,46 +60,58 @@ namespace btcp.ECS.core
 
         private void AddPendingComponent(int entityID, ECSComponent component)
         {
-            SafeGetPendingComponentBag(entityID).Set(SafeGetComponentID(component.GetType()), component);
+            int componentID = SafeGetComponentID(component.GetType());
+            SafeGetPendingComponentBag(entityID).Set(componentID, component);
         }
 
         private void RemovePendingComponent(int entityID, ECSComponent component)
         {
-            SafeGetPendingComponentBag(entityID).Set(GetComponentID(component.GetType()), null);
+            int componentID = GetComponentID(component.GetType());
+            SafeGetPendingComponentBag(entityID).Set(componentID, null);
         }
 
         public void InitializePendingComponents(int entityID)
         {
             Bag<ECSComponent> bag = SafeGetPendingComponentBag(entityID);
-            bag.ResizeToFit();
             List<ECSComponent> toInit = new List<ECSComponent>(bag.GetAll());
+
+            //TODO : Change Bag.ResizeToFit() to return bag without null entries rather than actually affecting bag?
+
             ECSComponent component = null;
 
             int attemptThreshold = 10;
 
+            for (int i = toInit.Count - 1; i >= 0; i--)
+            {
+                if (toInit[i] == null)
+                {
+                    toInit.RemoveAt(i);
+                }
+            }
 
-            while (toInit.Count > 0 && (toInit.Count > 1 && attemptThreshold > 0))
+            while (toInit.Count > 0 && attemptThreshold > 0)
             {
                 for (int i = toInit.Count - 1; i >= 0; i--)
                 {
                     component = toInit[i];
+                    RemovePendingComponent(entityID, component);
 
                     if (m_componentFactory.InitializeComponent(entityID, component) == 0)
                     {
-                        ECSDebug.Log("Initialized Component " + component);
+                        ECSDebug.LogForce("Initialized Component " + component);
                         SafeGetComponentBag(entityID).Set(SafeGetComponentID(component.GetType()), component);
                         OnComponentAdded(entityID, component);
                         toInit.RemoveAt(i);
                         continue;
                     }
+                    else
+                    {
+                        AddPendingComponent(entityID, component);
+                    }
 
                     attemptThreshold--;
                 }
             }
-
-
-            bag.Reset(toInit.Count);
-            bag.Add(toInit);
 
             ECSDebug.Assert(attemptThreshold > 0, " Reached attempt threshold, maybe two components are dependent on eachother?");
         }
@@ -188,7 +200,7 @@ namespace btcp.ECS.core
             GetComponentBag(entityID).Set(GetComponentID(component.GetType()), null);
         }
 
-        private void RemoveAllComponents(int entityID)
+        public void RemoveAllComponents(int entityID)
         {
             Bag<ECSComponent> componentBag = GetComponentBag(entityID);
             componentBag.ResizeToFit();

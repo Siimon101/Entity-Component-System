@@ -114,7 +114,7 @@ namespace btcp.ECS.examples.unity
                     }
                 }
 
-                OnColliderAttached(collider.Collider, entityID);
+                OnColliderAdded(collider.Collider, entityID);
             }
 
             if (component.GetType() == typeof(CSphereCollider))
@@ -139,7 +139,7 @@ namespace btcp.ECS.examples.unity
                     }
                 }
 
-                OnColliderAttached(cSphereCollider.Collider, entityID);
+                OnColliderAdded(cSphereCollider.Collider, entityID);
             }
 
             if (component.GetType() == typeof(CMeshRenderer))
@@ -180,7 +180,7 @@ namespace btcp.ECS.examples.unity
             return 0;
         }
 
-        private void OnColliderAttached(Collider unityCollider, int entityID)
+        private void OnColliderAdded(Collider unityCollider, int entityID)
         {
             if (m_componentManager.HasComponent<CCollider>(entityID) == false)
             {
@@ -189,6 +189,7 @@ namespace btcp.ECS.examples.unity
                 m_componentManager.AddComponent(entityID, newCollider);
             }
         }
+
 
         private T AddOrGetUnityComponent<T>(CTransform cTransform) where T : Component
         {
@@ -233,12 +234,10 @@ namespace btcp.ECS.examples.unity
 
         public virtual int DeInitializeComponent(int entityID, ECSComponent component)
         {
-
-
             if (component.GetType() == typeof(CTransform))
             {
                 CTransform cTransform = component as CTransform;
-                DestroyUnityComponent<Transform>(entityID, component);
+                GameObject.Destroy(cTransform.GameObject);
             }
 
             if (component.GetType() == typeof(CSpriteRenderer))
@@ -253,6 +252,13 @@ namespace btcp.ECS.examples.unity
                 CMeshCollider cMeshCollider = component as CMeshCollider;
                 DestroyUnityComponent<MeshCollider>(entityID, cMeshCollider);
                 GameObject.Destroy(cMeshCollider.Collider);
+            }
+
+            if (component.GetType() == typeof(CSphereCollider))
+            {
+                CSphereCollider cSphereCollider = component as CSphereCollider;
+                DestroyUnityComponent<SphereCollider>(entityID, cSphereCollider);
+                GameObject.Destroy(cSphereCollider.Collider);
             }
 
 
@@ -301,12 +307,12 @@ namespace btcp.ECS.examples.unity
 
         protected void OnComponentInitializeFailure(ECSComponent component, string reason)
         {
-            ECSDebug.LogError("Initializing Component " + component.GetType().Name + " failed. Reason: " + reason);
+            ECSDebug.LogWarning("Initializing Component " + component.GetType().Name + " failed. Reason: " + reason);
         }
 
         protected void OnComponentDeInitializeFailure(ECSComponent component, string reason)
         {
-            ECSDebug.LogError("DeInitializing Component " + component.GetType().Name + " failed. Reason: " + reason);
+            ECSDebug.LogWarning("DeInitializing Component " + component.GetType().Name + " failed. Reason: " + reason);
         }
     }
 }
