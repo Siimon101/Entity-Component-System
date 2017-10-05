@@ -9,6 +9,7 @@ namespace btcp.ECS.examples.unity.common.components
         public Collider Collider;
         public List<int> Collisions;
 
+
         public CCollider()
         {
             Collisions = new List<int>();

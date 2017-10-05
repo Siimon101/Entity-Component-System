@@ -161,6 +161,16 @@ namespace btcp.ECS.core
             return m_componentManager.GetComponent<T>(entityID);
         }
 
+        internal T SafeGetComponent<T>(int entityID) where T : ECSComponent
+        {
+            if (m_componentManager.HasComponent<T>(entityID) == false)
+            {
+                return null;
+            }
+
+            return m_componentManager.GetComponent<T>(entityID);
+        }
+
         public int[] GetEntitiesWithComponents(params Type[] args)
         {
             Bag<int> cachedQuery = GetQuery(args);

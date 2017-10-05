@@ -48,13 +48,14 @@ namespace btcp.ECS.examples.unity
 
                         cTransform.GameObject = GameObject.Instantiate(prefab);
                     }
-
                 }
-
-                cTransform.GameObject.layer = cTransform.LayerID;
-                cTransform.X = cTransform.GameObject.transform.position.x;
-                cTransform.Y = cTransform.GameObject.transform.position.y;
-                cTransform.Z = cTransform.GameObject.transform.position.z;
+                else
+                {
+                    cTransform.GameObject.layer = cTransform.LayerID;
+                    cTransform.X = cTransform.GameObject.transform.position.x;
+                    cTransform.Y = cTransform.GameObject.transform.position.y;
+                    cTransform.Z = cTransform.GameObject.transform.position.z;
+                }
             }
 
             if (component.GetType() == typeof(CSpriteRenderer))

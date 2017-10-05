@@ -27,6 +27,12 @@ namespace btcp.ECS.core
             return m_queryManager.GetComponent<T>(entityID);
         }
 
+
+        protected T SafeGetComponent<T>(int entityID) where T : ECSComponent
+        {
+            return m_queryManager.SafeGetComponent<T>(entityID);
+        }
+
         protected bool IsEntityValid(int entityID)
         {
             return m_queryManager.IsEntityValid(entityID);

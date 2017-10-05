@@ -23,7 +23,10 @@ namespace btcp.halloweenpumpkin.src.core.Systems
                 BoxCollider collider = cBoxCollider.BoxCollider;
 
                 List<int> collisions = new List<int>();
-                RaycastHit[] hits = Physics.BoxCastAll(cBoxCollider.BoxCollider.center, cBoxCollider.BoxCollider.size / 2, -Vector3.up);
+
+                Vector3 size = cBoxCollider.BoxCollider.transform.TransformVector(cBoxCollider.BoxCollider.size);
+                size.z = Mathf.Abs(size.z);
+                RaycastHit[] hits = Physics.BoxCastAll(cBoxCollider.BoxCollider.transform.TransformPoint(cBoxCollider.BoxCollider.transform.position), size / 2, Vector3.up);
 
                 foreach (RaycastHit hit in hits)
                 {
@@ -38,7 +41,8 @@ namespace btcp.halloweenpumpkin.src.core.Systems
                     }
 
                     int entityID = m_colliderBag.Has(hit.collider);
-                    collisions.Add(entityID);
+                    if (entityID > 0)
+                        collisions.Add(entityID);
                 }
 
                 CCollider cCollider = GetComponent<CCollider>(eID);
