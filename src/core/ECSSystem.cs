@@ -28,9 +28,9 @@ namespace btcp.ECS.core
         }
 
 
-        protected T SafeGetComponent<T>(int entityID) where T : ECSComponent
+        protected bool HasComponent<T>(int entityID) where T : ECSComponent
         {
-            return m_queryManager.SafeGetComponent<T>(entityID);
+            return m_queryManager.HasComponent<T>(entityID);
         }
 
         protected bool IsEntityValid(int entityID)
@@ -47,9 +47,35 @@ namespace btcp.ECS.core
         {
             return m_entityManager.CreateEntity(archetype);
         }
+
         protected void DestroyEntity(int entityID)
         {
             m_entityManager.DestroyEntity(entityID);
+        }
+
+
+        public virtual void OnEntityCreated(ECSEntity entity)
+        {
+        }
+
+        public virtual void OnEntityDestroyedPre(ECSEntity entity)
+        {
+        }
+
+        public virtual void OnEntityDestroyedPost(ECSEntity entity)
+        {
+        }
+
+        public virtual void OnComponentAdded(int entityID, ECSComponent component)
+        {
+        }
+
+        public virtual void OnComponentRemovedPre(int entityID, ECSComponent component)
+        {
+        }
+
+        public virtual void OnComponentRemovedPost(int entityID, ECSComponent component)
+        {
         }
 
         protected bool SafeHasComponent<T>(int entityID) where T : ECSComponent

@@ -260,5 +260,12 @@ namespace btcp.ECS.utils
         {
             ECSDebug.Assert(condition, v);
         }
+
+        internal Bag<T> Clone()
+        {
+            Bag<T> newBag = new Bag<T>(this.GetSize());
+            newBag.Add(this.m_data);
+            return newBag;
+        }
     }
 }

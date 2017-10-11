@@ -4,7 +4,7 @@ using btcp.ECS.core;
 using btcp.ECS.examples.unity.common.components;
 using btcp.ECS.interfaces;
 using btcp.ECS.utils;
-using btcp.src.utils;
+using btcp.halloweengame.src.Utils;
 using UnityEngine;
 
 namespace btcp.ECS.examples.unity
@@ -49,12 +49,40 @@ namespace btcp.ECS.examples.unity
                         cTransform.GameObject = GameObject.Instantiate(prefab);
                     }
                 }
-                else
+
+                if (cTransform.LayerID != -1)
                 {
                     cTransform.GameObject.layer = cTransform.LayerID;
+                }
+
+                if (cTransform.X.Equals(float.NaN))
+                {
                     cTransform.X = cTransform.GameObject.transform.position.x;
+                }
+
+                if (cTransform.Y.Equals(float.NaN))
+                {
                     cTransform.Y = cTransform.GameObject.transform.position.y;
+                }
+
+                if (cTransform.Z.Equals(float.NaN))
+                {
                     cTransform.Z = cTransform.GameObject.transform.position.z;
+                }
+
+                if (cTransform.RotationX.Equals(float.NaN))
+                {
+                    cTransform.RotationX = cTransform.GameObject.transform.eulerAngles.x;
+                }
+
+                if (cTransform.RotationY.Equals(float.NaN))
+                {
+                    cTransform.RotationY = cTransform.GameObject.transform.eulerAngles.y;
+                }
+
+                if (cTransform.RotationZ.Equals(float.NaN))
+                {
+                    cTransform.RotationZ = cTransform.GameObject.transform.eulerAngles.z;
                 }
             }
 
@@ -207,9 +235,15 @@ namespace btcp.ECS.examples.unity
             {
                 CCollider newCollider = new CCollider();
                 newCollider.Collider = unityCollider;
+                unityCollider.gameObject.AddComponent<CollisionNotifier>();
                 m_componentManager.AddComponent(entityID, newCollider);
             }
         }
+        private void OnColliderRemoved(int entityID, Collider unityCollider)
+        {
+            GameObject.Destroy(unityCollider.GetComponent<CollisionNotifier>());
+        }
+
 
 
         private T AddOrGetUnityComponent<T>(CTransform cTransform) where T : Component
@@ -270,18 +304,21 @@ namespace btcp.ECS.examples.unity
             if (component.GetType() == typeof(CBoxCollider))
             {
                 CBoxCollider cBoxCollider = component as CBoxCollider;
+                OnColliderRemoved(entityID, cBoxCollider.BoxCollider);
                 DestroyUnityComponent<BoxCollider>(entityID, cBoxCollider);
             }
 
             if (component.GetType() == typeof(CMeshCollider))
             {
                 CMeshCollider cMeshCollider = component as CMeshCollider;
+                OnColliderRemoved(entityID, cMeshCollider.Collider);
                 DestroyUnityComponent<MeshCollider>(entityID, cMeshCollider);
             }
 
             if (component.GetType() == typeof(CSphereCollider))
             {
                 CSphereCollider cSphereCollider = component as CSphereCollider;
+                OnColliderRemoved(entityID, cSphereCollider.Collider);
                 DestroyUnityComponent<SphereCollider>(entityID, cSphereCollider);
             }
 
@@ -303,7 +340,6 @@ namespace btcp.ECS.examples.unity
 
             return 0;
         }
-
 
         private int DestroyUnityComponent<T>(int entityID, ECSComponent component) where T : Component
         {

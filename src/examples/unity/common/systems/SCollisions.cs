@@ -1,66 +1,118 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Utilities.MessageHandler;
 using btcp.ECS.core;
 using btcp.ECS.examples.unity.common.components;
 using btcp.ECS.utils;
+using btcp.halloweengame.src.Utils;
 using UnityEngine;
 
-namespace btcp.halloweenpumpkin.src.core.Systems
+namespace btcp.ECS.examples.unity.common.systems
 {
     public class SCollisions : ECSSystem
     {
-
-        internal override void Update()
+        private Bag<CollisionNotifier> m_collisioNotifiers;
+        public SCollisions()
         {
-            int[] allColliders = GetEntitiesWithComponents(typeof(CCollider));
-            CacheColliders(allColliders);
+            m_collisioNotifiers = new Bag<CollisionNotifier>();
+        }
 
+        public override void OnComponentAdded(int entityID, ECSComponent component)
+        {
+            UpdateCollisionNotifiers();
+        }
 
-            int[] entities = GetEntitiesWithComponents(typeof(CBoxCollider));
-            foreach (int eID in entities)
+        public override void OnComponentRemovedPre(int entityID, ECSComponent component)
+        {
+            if (component.GetType() == typeof(CCollider))
             {
-                CBoxCollider cBoxCollider = GetComponent<CBoxCollider>(eID);
-                BoxCollider collider = cBoxCollider.BoxCollider;
-
-                List<int> collisions = new List<int>();
-
-                Vector3 size = cBoxCollider.BoxCollider.transform.TransformVector(cBoxCollider.BoxCollider.size);
-                size.z = Mathf.Abs(size.z);
-                RaycastHit[] hits = Physics.BoxCastAll(cBoxCollider.BoxCollider.transform.TransformPoint(cBoxCollider.BoxCollider.transform.position), size / 2, Vector3.up);
-
-                foreach (RaycastHit hit in hits)
-                {
-                    if (hit.collider == null)
-                    {
-                        continue;
-                    }
-
-                    if (hit.collider == collider)
-                    {
-                        continue;
-                    }
-
-                    int entityID = m_colliderBag.Has(hit.collider);
-                    if (entityID > 0)
-                        collisions.Add(entityID);
-                }
-
-                CCollider cCollider = GetComponent<CCollider>(eID);
-                cCollider.Collisions = collisions;
+                RemoveEntity(entityID);
             }
         }
 
-        private Bag<Collider> m_colliderBag;
-
-        private void CacheColliders(int[] entities)
+        public override void OnEntityDestroyedPre(ECSEntity entity)
         {
-            m_colliderBag = new Bag<Collider>(entities.Length);
+            RemoveEntity(entity.EntityID);
+        }
 
-            foreach (int eID in entities)
+        private void AddEntity(int entityID)
+        {
+            CCollider cCollider = GetComponent<CCollider>(entityID);
+            CollisionNotifier notifier = cCollider.Collider.GetComponent<CollisionNotifier>();
+
+            if (m_collisioNotifiers.Has(notifier) == -1)
             {
-                CCollider collider = GetComponent<CCollider>(eID);
-                m_colliderBag.Set(eID, collider.Collider);
+                m_collisioNotifiers.Set(entityID, notifier);
+                notifier.OnCollisionBegin += OnCollisionBegin;
+                notifier.OnCollisionEnd += OnCollisionEnd;
             }
+
+        }
+
+        private void RemoveEntity(int entityID)
+        {
+            CCollider cCollider = GetComponent<CCollider>(entityID);
+            CollisionNotifier notifier = cCollider.Collider.GetComponent<CollisionNotifier>();
+
+            if (m_collisioNotifiers.Has(notifier) > -1 - 1)
+            {
+                m_collisioNotifiers.Set(entityID, null);
+                notifier.OnCollisionBegin -= OnCollisionBegin;
+                notifier.OnCollisionEnd -= OnCollisionEnd;
+            }
+        }
+
+        public void UpdateCollisionNotifiers()
+        {
+            int[] allColliders = GetEntitiesWithComponents(typeof(CCollider));
+
+            foreach (int eID in allColliders)
+            {
+                AddEntity(eID);
+            }
+        }
+
+        private int GetEntityByCollider(CollisionNotifier collisionNotifier)
+        {
+            return m_collisioNotifiers.Has(collisionNotifier);
+        }
+
+        private void OnCollisionBegin(CollisionNotifier collisionNotifier, Collider collider)
+        {
+            int entityID = m_collisioNotifiers.Has(collisionNotifier);
+            AddCollision(entityID, collider);
+        }
+
+        private void AddCollision(int entityID, Collider collider)
+        {
+            CCollider cCollider = GetComponent<CCollider>(entityID);
+            int collidedEntity = GetEntityByCollider(collider.GetComponent<CollisionNotifier>());
+
+            if (cCollider.Collisions.Contains(collidedEntity) == false)
+            {
+                cCollider.Collisions.Add(collidedEntity);
+            }
+        }
+
+        private void RemoveCollision(int entityID, Collider collider)
+        {
+            CCollider cCollider = GetComponent<CCollider>(entityID);
+            int collidedEntity = GetEntityByCollider(collider.GetComponent<CollisionNotifier>());
+
+            if (cCollider.Collisions.Contains(collidedEntity))
+            {
+                cCollider.Collisions.Remove(collidedEntity);
+            }
+        }
+
+        private void OnCollisionEnd(CollisionNotifier collisionNotifier, Collider collider)
+        {
+            int entityID = m_collisioNotifiers.Has(collisionNotifier);
+            RemoveCollision(entityID, collider);
+        }
+
+        internal override void Update()
+        {
         }
     }
 }

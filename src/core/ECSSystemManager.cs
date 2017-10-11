@@ -11,6 +11,7 @@ namespace btcp.ECS.core
 
         private ECSQueryManager m_queryManager;
         private ECSEntityManager m_entityManager;
+        private ECSComponentManager m_componentManager;
         private List<Type> m_systemIdentifiers;
         private Bag<ECSSystem> m_systems;
         private List<ECSSystem> m_sortedSystems;
@@ -21,14 +22,22 @@ namespace btcp.ECS.core
             m_systems = new Bag<ECSSystem>();
         }
 
-        public void Initialize(ECSQueryManager queryManager, ECSEntityManager entityManager)
+        public void Initialize(ECSQueryManager queryManager, ECSEntityManager entityManager, ECSComponentManager componentManager)
         {
             m_queryManager = queryManager;
             m_entityManager = entityManager;
+             m_componentManager = componentManager;
         }
 
         public void CreateSystem(ECSSystem system)
         {
+            m_entityManager.OnEntityCreated += system.OnEntityCreated;
+            m_entityManager.OnEntityDestroyedPre += system.OnEntityDestroyedPre;
+            m_entityManager.OnEntityDestroyedPost += system.OnEntityDestroyedPost;
+            m_componentManager.OnComponentAdded += system.OnComponentAdded;
+            m_componentManager.OnComponentRemovedPre += system.OnComponentRemovedPre;
+            m_componentManager.OnComponentRemovedPost += system.OnComponentRemovedPost;
+
             m_systems.Set(SafeGetSystemID(system.GetType()), system);
             system.Provide(m_queryManager, m_entityManager);
             SortSystems();
@@ -36,7 +45,15 @@ namespace btcp.ECS.core
 
         public void RemoveSystem<T>() where T : ECSSystem
         {
-            m_systems.Set(GetSystemID(typeof(T)), null);
+            int systemID = GetSystemID(typeof(T));
+            ECSSystem system = m_systems.Get(systemID);
+            m_entityManager.OnEntityCreated -= system.OnEntityCreated;
+           m_entityManager.OnEntityDestroyedPre -= system.OnEntityDestroyedPre;
+            m_entityManager.OnEntityDestroyedPost -= system.OnEntityDestroyedPost;
+             m_componentManager.OnComponentAdded -= system.OnComponentAdded;
+            m_componentManager.OnComponentRemovedPre -= system.OnComponentRemovedPre;
+            m_componentManager.OnComponentRemovedPost -= system.OnComponentRemovedPost;
+            m_systems.Set(systemID, null);
             SortSystems();
         }
 

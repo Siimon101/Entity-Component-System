@@ -23,7 +23,7 @@
 
             m_queryManager = new ECSQueryManager(m_componentManager, m_entityManager);
 
-            m_systemManager.Initialize(m_queryManager, m_entityManager);
+            m_systemManager.Initialize(m_queryManager, m_entityManager, m_componentManager);
         }
 
         internal void Update()

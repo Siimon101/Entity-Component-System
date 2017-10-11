@@ -12,7 +12,8 @@ namespace btcp.ECS.core
 
         public delegate void ComponentCallback(int entityID, ECSComponent component);
         public event ComponentCallback OnComponentAdded;
-        public event ComponentCallback OnComponentRemoved;
+        public event ComponentCallback OnComponentRemovedPre;
+        public event ComponentCallback OnComponentRemovedPost;
 
         private List<Type> m_componentIdentifiers;
         private Dictionary<int, Bag<ECSComponent>> m_entityComponents;
@@ -73,14 +74,15 @@ namespace btcp.ECS.core
         public void InitializePendingComponents(int entityID)
         {
             Bag<ECSComponent> bag = SafeGetPendingComponentBag(entityID);
-            List<ECSComponent> toInit = new List<ECSComponent>(bag.GetAll());
 
-            //TODO : Change Bag.ResizeToFit() to return bag without null entries rather than actually affecting bag?
 
             ECSComponent component = null;
 
             int START_THRESHOLD = 10;
             int attemptThreshold = START_THRESHOLD;
+
+            //TODO : Change Bag.ResizeToFit() to return bag without null entries rather than actually affecting bag?
+            List<ECSComponent> toInit = new List<ECSComponent>(bag.GetAll());
 
             for (int i = toInit.Count - 1; i >= 0; i--)
             {
@@ -99,7 +101,6 @@ namespace btcp.ECS.core
 
                     if (m_componentFactory.InitializeComponent(entityID, component) == 0)
                     {
-                        ECSDebug.LogForce("Initialized Component " + component);
                         SafeGetComponentBag(entityID).Set(SafeGetComponentID(component.GetType()), component);
                         OnComponentAdded(entityID, component);
                         toInit.RemoveAt(i);
@@ -147,6 +148,7 @@ namespace btcp.ECS.core
 
         private Bag<ECSComponent> GetComponentBag(int entityID)
         {
+            ECSDebug.Assert(m_entityComponents.ContainsKey(entityID) == true, "Entity does not have a component bag! > " + entityID);
             return m_entityComponents[entityID];
         }
 
@@ -164,6 +166,7 @@ namespace btcp.ECS.core
         {
             return GetComponentBag(entityID).Get(GetComponentID(typeof(T))) as T;
         }
+
 
         public ECSComponent[] GetComponents(ECSEntity entity)
         {
@@ -196,14 +199,15 @@ namespace btcp.ECS.core
 
         public void RemoveComponent(int entityID, ECSComponent component)
         {
-            OnComponentRemoved(entityID, component);
-            m_componentFactory.DeInitializeComponent(entityID, component);
+            OnComponentRemovedPre(entityID, component);
             GetComponentBag(entityID).Set(GetComponentID(component.GetType()), null);
+            m_componentFactory.DeInitializeComponent(entityID, component);
+            OnComponentRemovedPost(entityID, component);
         }
 
         public void RemoveAllComponents(int entityID)
         {
-            Bag<ECSComponent> componentBag = GetComponentBag(entityID);
+            Bag<ECSComponent> componentBag = GetComponentBag(entityID).Clone();
             componentBag.ResizeToFit();
 
             foreach (ECSComponent component in componentBag.GetAll())

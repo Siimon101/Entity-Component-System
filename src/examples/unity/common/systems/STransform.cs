@@ -15,11 +15,18 @@ namespace btcp.ECS.examples.unity.common.systems
             {
                 CTransform cTransform = GetComponent<CTransform>(eID);
 
-                Vector3 pos = cTransform.GameObject.transform.position;
+                Vector3 pos = Vector3.zero;
                 pos.x = cTransform.X;
                 pos.y = cTransform.Y;
                 pos.z = cTransform.Z;
-                cTransform.GameObject.transform.position = pos;
+
+                Vector3 rot = Vector3.zero;
+                rot.x = cTransform.RotationX;
+                rot.y = cTransform.RotationY;
+                rot.z = cTransform.RotationZ;
+
+                cTransform.GameObject.transform.position = (pos);
+                cTransform.GameObject.transform.eulerAngles = (rot);
             }
         }
 

@@ -5,14 +5,17 @@ namespace btcp.ECS.examples.unity.common.components
 {
     public class CTransform : ECSComponent
     {
-        public float X;
-        public float Y;
-        public float Z;
+        public float X = float.NaN;
+        public float Y = float.NaN;
+        public float Z = float.NaN;
+        public float RotationX = float.NaN;
+        public float RotationY = float.NaN;
+        public float RotationZ = float.NaN;
 
         public string Name;
         public GameObject GameObject;
 
-        public int LayerID;
+        public int LayerID = -1;
 
         ///The path of the prefab (must be located in Resources folder)
         public string PrefabID;
@@ -32,6 +35,13 @@ namespace btcp.ECS.examples.unity.common.components
             X = x;
             Y = y;
             Z = z;
+        }
+
+        public CTransform(float x, float y, float z, float rotX, float rotY, float rotZ) : this(x, y, z)
+        {
+            RotationX = rotX;
+            RotationY = rotY;
+            RotationZ = rotZ;
         }
     }
 }

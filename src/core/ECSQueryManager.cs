@@ -22,8 +22,8 @@ namespace btcp.ECS.core
             m_entityManager = entityManager;
 
             m_componentManager.OnComponentAdded += OnComponentAdded;
-            m_componentManager.OnComponentRemoved += OnComponentAdded;
-            m_entityManager.OnEntityDestroyed += OnEntityDestroyed;
+            m_componentManager.OnComponentRemovedPost += OnComponentRemovedPost;
+            m_entityManager.OnEntityDestroyedPre += OnEntityDestroyedPre;
         }
 
         private Bag<int> GetQuery(Type[] args)
@@ -100,7 +100,7 @@ namespace btcp.ECS.core
 
         }
 
-        private void OnEntityDestroyed(ECSEntity entity)
+        private void OnEntityDestroyedPre(ECSEntity entity)
         {
             int entityID = entity.EntityID;
             Bag<int> query = null;
@@ -137,13 +137,18 @@ namespace btcp.ECS.core
         }
 
 
-        private void OnComponentRemoved(int entityID, ECSComponent component)
+        private void OnComponentRemovedPost(int entityID, ECSComponent component)
         {
             Bag<int> query = null;
 
             foreach (Type[] type in m_queries.Keys)
             {
                 query = GetQuery(type);
+
+                if(query.Has(entityID) == -1)
+                {
+                    continue;
+                }
 
                 if (m_componentManager.HasComponents(entityID, type) == false)
                 {
@@ -153,22 +158,14 @@ namespace btcp.ECS.core
             }
         }
 
-
-
-
         internal T GetComponent<T>(int entityID) where T : ECSComponent
         {
             return m_componentManager.GetComponent<T>(entityID);
         }
 
-        internal T SafeGetComponent<T>(int entityID) where T : ECSComponent
+        internal bool HasComponent<T>(int entityID) where T : ECSComponent
         {
-            if (m_componentManager.HasComponent<T>(entityID) == false)
-            {
-                return null;
-            }
-
-            return m_componentManager.GetComponent<T>(entityID);
+            return m_componentManager.HasComponent<T>(entityID);
         }
 
         public int[] GetEntitiesWithComponents(params Type[] args)

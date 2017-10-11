@@ -17,9 +17,16 @@ namespace btcp.ECS.examples.unity.common.systems
                 CRigidbody cRigidbody = GetComponent<CRigidbody>(eID);
                 CTransform cTransform = GetComponent<CTransform>(eID);
 
-                cTransform.X = cRigidbody.RigidBody.position.x;
-                cTransform.Y = cRigidbody.RigidBody.position.y;
-                cTransform.Z = cRigidbody.RigidBody.position.z;
+                Vector3 position = cRigidbody.RigidBody.position;
+
+                cTransform.X = position.x;
+                cTransform.Y = position.y;
+                cTransform.Z = position.z;
+
+                Vector3 rot = (cRigidbody.RigidBody.rotation.eulerAngles);
+                cTransform.RotationX = rot.x;
+                cTransform.RotationY = rot.y;
+                cTransform.RotationZ = rot.z;
             }
         }
 

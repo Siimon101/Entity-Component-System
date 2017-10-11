@@ -8,39 +8,28 @@ namespace btcp.ECS.examples.unity.common.systems
     public class SMovement : ECSSystem
     {
 
-        internal override void LateUpdate()
+        internal override void FixedUpdate()
         {
-            int[] entities = GetEntitiesWithComponents(typeof(CRigidbody), typeof(CMovement));
+            int[] entities = GetEntitiesWithComponents(typeof(CMovement), typeof(CTransform));
 
             foreach (int eID in entities)
             {
-                CRigidbody cRigidbody = GetComponent<CRigidbody>(eID);
                 CMovement cMovement = GetComponent<CMovement>(eID);
+                CTransform cTransform = GetComponent<CTransform>(eID);
 
-                Vector3 velocityDifference = cRigidbody.RigidBody.velocity - new Vector3(cMovement.VelocityX, cMovement.VelocityY, cMovement.VelocityZ);
-
-                if (Vector3.Distance(cRigidbody.RigidBody.velocity, new Vector3(cMovement.VelocityX, cMovement.VelocityY, cMovement.VelocityZ)) == 0)
+                if (HasComponent<CRigidbody>(eID))
                 {
-                    continue;
+                    CRigidbody cRigidbody = GetComponent<CRigidbody>(eID);
+                    cRigidbody.RigidBody.AddForce(cMovement.VelocityX, cMovement.VelocityY, cMovement.VelocityZ, ForceMode.VelocityChange);
+                }
+                else
+                {
+                   cTransform.GameObject.transform.Translate(cMovement.VelocityX, cMovement.VelocityY, cMovement.VelocityZ);
                 }
 
-                float xSpeed = GetSpeed(cMovement.VelocityX, velocityDifference.x);
-                float ySpeed = GetSpeed(cMovement.VelocityY, velocityDifference.y);
-                float zSpeed = GetSpeed(cMovement.VelocityZ, velocityDifference.z);
-
-                cRigidbody.RigidBody.AddForce(xSpeed, ySpeed, zSpeed, ForceMode.VelocityChange);
-            }
-        }
-
-        private float GetSpeed(float targetSpeed, float speedDifference)
-        {
-            if (targetSpeed > Mathf.Abs(speedDifference))
-            {
-                return Mathf.Abs(speedDifference);
-            }
-            else
-            {
-                return targetSpeed;
+                cMovement.VelocityX = 0;
+                cMovement.VelocityY = 0;
+                cMovement.VelocityZ = 0;
             }
         }
     }
