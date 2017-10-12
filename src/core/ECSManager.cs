@@ -1,4 +1,6 @@
-﻿namespace btcp.ECS.core
+﻿using btcp.ECS.interfaces;
+
+namespace btcp.ECS.core
 {
     public class ECSManager
     {
@@ -24,6 +26,12 @@
             m_queryManager = new ECSQueryManager(m_componentManager, m_entityManager);
 
             m_systemManager.Initialize(m_queryManager, m_entityManager, m_componentManager);
+        }
+
+        public ECSManager(IECSEntityFactory entityFactory, IECSComponentFactory componentFactory) :this()
+        {
+            m_entityManager.Provide(entityFactory, m_componentManager);
+            m_componentManager.Provide(componentFactory);
         }
 
         internal void Update()

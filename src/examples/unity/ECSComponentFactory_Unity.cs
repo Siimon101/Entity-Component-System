@@ -4,7 +4,6 @@ using btcp.ECS.core;
 using btcp.ECS.examples.unity.common.components;
 using btcp.ECS.interfaces;
 using btcp.ECS.utils;
-using btcp.halloweengame.src.Utils;
 using UnityEngine;
 
 namespace btcp.ECS.examples.unity
@@ -13,7 +12,7 @@ namespace btcp.ECS.examples.unity
     {
 
         private ECSComponentManager m_componentManager;
-        public ECSComponentFactory_Unity(ECSComponentManager componentManager)
+        public void Initialize(ECSComponentManager componentManager)
         {
             m_componentManager = componentManager;
         }
@@ -184,7 +183,7 @@ namespace btcp.ECS.examples.unity
 
                     if (cSphereCollider.PhysicsMaterialID != null && (cSphereCollider.Collider.material == null || cSphereCollider.Collider.material.name != cSphereCollider.PhysicsMaterialID))
                     {
-                        cSphereCollider.Collider.material = ResourceManager.GetInstance().Get<PhysicMaterial>(cSphereCollider.PhysicsMaterialID);
+                        cSphereCollider.Collider.material = Resources.Load<PhysicMaterial>(cSphereCollider.PhysicsMaterialID);
                     }
                 }
 
@@ -208,7 +207,7 @@ namespace btcp.ECS.examples.unity
 
                     if (meshRenderer.MaterialID != null && (meshRenderer.MeshRenderer.material == null || meshRenderer.MeshRenderer.material.name != meshRenderer.MaterialID))
                     {
-                        meshRenderer.MeshRenderer.material = ResourceManager.GetInstance().Get<Material>(meshRenderer.MaterialID);
+                        meshRenderer.MeshRenderer.material = Resources.Load<Material>(meshRenderer.MaterialID);
                     }
 
                 }
@@ -220,7 +219,7 @@ namespace btcp.ECS.examples.unity
 
                     if (meshRenderer.MeshID != null && (meshRenderer.MeshFilter.mesh == null || meshRenderer.MeshFilter.mesh.name != meshRenderer.MeshID))
                     {
-                        Mesh mesh = ResourceManager.GetInstance().Get<Mesh>(meshRenderer.MeshID);
+                        Mesh mesh = Resources.Load<Mesh>(meshRenderer.MeshID);
                         meshRenderer.MeshFilter.mesh = mesh;
                     }
                 }

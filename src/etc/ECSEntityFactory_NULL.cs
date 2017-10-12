@@ -8,6 +8,11 @@ namespace btcp.ECS.etc
     public class ECSEntityFactory_NULL : IECSEntityFactory
     {
 
+        public void Initialize(ECSComponentManager componentManager)
+        {
+
+        }
+
         public ECSEntity SetupEntity(ECSEntity e, string archetype)
         {
             ECSDebug.LogWarning("EntityFactory was not provided.. Using " + GetType().Name);

@@ -7,6 +7,10 @@ namespace btcp.ECS.etc
 {
     public class ECSComponentFactory_NULL : IECSComponentFactory
     {
+        public void Initialize(ECSComponentManager componentManager)
+        {
+
+        }
 
         public ECSComponent CreateComponent<T>()
         {

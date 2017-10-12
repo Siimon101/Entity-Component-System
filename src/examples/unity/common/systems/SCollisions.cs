@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Assets.Scripts.Utilities.MessageHandler;
 using btcp.ECS.core;
 using btcp.ECS.examples.unity.common.components;
 using btcp.ECS.utils;
-using btcp.halloweengame.src.Utils;
 using UnityEngine;
 
 namespace btcp.ECS.examples.unity.common.systems

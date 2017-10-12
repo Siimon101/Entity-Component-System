@@ -43,5 +43,10 @@ namespace btcp.ECS.examples.unity.common.components
             RotationY = rotY;
             RotationZ = rotZ;
         }
+
+        public CTransform(string name)
+        {
+            this.Name = name;
+        }
     }
 }

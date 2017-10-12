@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Assets.Scripts.Utilities.MessageHandler;
 using btcp.ECS.etc;
 using btcp.ECS.interfaces;
 using btcp.ECS.utils;
@@ -30,6 +29,7 @@ namespace btcp.ECS.core
 
         public void Provide(IECSComponentFactory factory)
         {
+            factory.Initialize(this);
             m_componentFactory = factory;
         }
 

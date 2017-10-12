@@ -16,10 +16,18 @@ namespace btcp.ECS.examples.unity
         private ECSParserJSON m_parser;
         private IECSParserDataLocator m_dataLocator;
 
-        public ECSEntityFactory_Unity(string json, ECSComponentManager componentManager)
+        public ECSEntityFactory_Unity()
+        {
+            m_dataLocator = new ECSParserDataLocator_Default();
+        }
+
+        public void Initialize(ECSComponentManager componentManager)
         {
             m_componentManager = componentManager;
-            m_dataLocator = new ECSParserDataLocator_Default();
+        }
+
+        public void ProvideJSON(string json)
+        {
             m_parser = new ECSParserJSON(m_dataLocator);
             m_parser.Provide(json);
         }
@@ -36,7 +44,8 @@ namespace btcp.ECS.examples.unity
 
         public ECSEntity SetupEntity(ECSEntity e, string archetype)
         {
-
+            ECSDebug.Assert(m_parser != null, "Cannot create Entity from Archetype > JSON not provided!");
+            
             JSONNode archetypeData = m_parser.GetArchetypeData(archetype);
 
             string baseArchetype = m_dataLocator.GetBaseArchetype(archetypeData);

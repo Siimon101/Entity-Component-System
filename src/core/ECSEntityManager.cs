@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Assets.Scripts.Utilities.MessageHandler;
 using btcp.ECS.etc;
 using btcp.ECS.interfaces;
 using btcp.ECS.utils;
@@ -25,8 +24,9 @@ namespace btcp.ECS.core
             m_entityFactory = new ECSEntityFactory_NULL();
         }
 
-        public void Provide(IECSEntityFactory factory)
+        public void Provide(IECSEntityFactory factory, ECSComponentManager componentManager)
         {
+            factory.Initialize(componentManager);
             m_entityFactory = factory;
         }
 
