@@ -73,26 +73,24 @@ namespace btcp.ECS.core
 
         public void InitializePendingComponents(int entityID)
         {
-            Bag<ECSComponent> bag = SafeGetPendingComponentBag(entityID);
-
+            Bag<ECSComponent> bag = SafeGetPendingComponentBag(entityID).Clone();
+            bag.ResizeToFit();
 
             ECSComponent component = null;
 
-            int START_THRESHOLD = 10;
-            int attemptThreshold = START_THRESHOLD;
-
-            //TODO : Change Bag.ResizeToFit() to return bag without null entries rather than actually affecting bag?
             List<ECSComponent> toInit = new List<ECSComponent>(bag.GetAll());
 
-            for (int i = toInit.Count - 1; i >= 0; i--)
+            int attemptThreshold = -1;
+            int START_THRESHOLD = 1;
+
+            if (toInit.Count > 0)
             {
-                if (toInit[i] == null)
-                {
-                    toInit.RemoveAt(i);
-                }
+                START_THRESHOLD = 10;
             }
 
-            while ((toInit.Count > 0 && attemptThreshold == START_THRESHOLD) || (toInit.Count > 1 && attemptThreshold > 0))
+            attemptThreshold = START_THRESHOLD;
+
+            while (toInit.Count > 0 && attemptThreshold > 0)
             {
                 for (int i = toInit.Count - 1; i >= 0; i--)
                 {
@@ -104,14 +102,14 @@ namespace btcp.ECS.core
                         SafeGetComponentBag(entityID).Set(SafeGetComponentID(component.GetType()), component);
                         OnComponentAdded(entityID, component);
                         toInit.RemoveAt(i);
+                        attemptThreshold = START_THRESHOLD;
                         continue;
                     }
                     else
                     {
                         AddPendingComponent(entityID, component);
+                        attemptThreshold--;
                     }
-
-                    attemptThreshold--;
                 }
             }
 

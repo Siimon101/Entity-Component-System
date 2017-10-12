@@ -123,8 +123,11 @@ namespace btcp.ECS.examples.unity
                 {
                     return 1;
                 }
-
-                cBoxCollider.BoxCollider = AddOrGetUnityComponent<BoxCollider>(cTransform);
+                if (cBoxCollider.BoxCollider == null)
+                {
+                    cBoxCollider.BoxCollider = AddOrGetUnityComponent<BoxCollider>(cTransform);
+                }
+                
                 OnColliderAdded(cBoxCollider.BoxCollider, entityID);
             }
 
