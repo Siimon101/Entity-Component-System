@@ -48,5 +48,5 @@ namespace btcp.ECS.examples.unity.common.components
         {
             this.Name = name;
         }
-    }
+}
 }

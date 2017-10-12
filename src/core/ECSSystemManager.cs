@@ -26,7 +26,7 @@ namespace btcp.ECS.core
         {
             m_queryManager = queryManager;
             m_entityManager = entityManager;
-             m_componentManager = componentManager;
+            m_componentManager = componentManager;
         }
 
         public void CreateSystem(ECSSystem system)
@@ -48,9 +48,9 @@ namespace btcp.ECS.core
             int systemID = GetSystemID(typeof(T));
             ECSSystem system = m_systems.Get(systemID);
             m_entityManager.OnEntityCreated -= system.OnEntityCreated;
-           m_entityManager.OnEntityDestroyedPre -= system.OnEntityDestroyedPre;
+            m_entityManager.OnEntityDestroyedPre -= system.OnEntityDestroyedPre;
             m_entityManager.OnEntityDestroyedPost -= system.OnEntityDestroyedPost;
-             m_componentManager.OnComponentAdded -= system.OnComponentAdded;
+            m_componentManager.OnComponentAdded -= system.OnComponentAdded;
             m_componentManager.OnComponentRemovedPre -= system.OnComponentRemovedPre;
             m_componentManager.OnComponentRemovedPost -= system.OnComponentRemovedPost;
             m_systems.Set(systemID, null);
@@ -88,6 +88,11 @@ namespace btcp.ECS.core
         {
             foreach (ECSSystem system in m_sortedSystems)
             {
+                if (system.IsEnabled() == false)
+                {
+                    break;
+                }
+
                 system.Update();
             }
         }
@@ -96,6 +101,11 @@ namespace btcp.ECS.core
         {
             foreach (ECSSystem system in m_sortedSystems)
             {
+                if (system.IsEnabled() == false)
+                {
+                    break;
+                }
+
                 system.FixedUpdate();
             }
         }
@@ -104,6 +114,11 @@ namespace btcp.ECS.core
         {
             foreach (ECSSystem system in m_sortedSystems)
             {
+                if (system.IsEnabled() == false)
+                {
+                    break;
+                }
+
                 system.LateUpdate();
             }
         }
@@ -112,12 +127,17 @@ namespace btcp.ECS.core
         {
             m_sortedSystems = new List<ECSSystem>();
 
-            List<ECSSystem> systems = new List<ECSSystem>(m_systems.GetAll());
+            Bag<ECSSystem> bag = m_systems.Clone();
+            bag.ResizeToFit();
+
+            List<ECSSystem> systems = new List<ECSSystem>(bag.GetAll());
+            List<ECSSystem> disabledSystems = new List<ECSSystem>();
 
             for (int i = systems.Count - 1; i >= 0; i--)
             {
-                if (systems[i] == null)
+                if (systems[i].IsEnabled() == false)
                 {
+                    disabledSystems.Add(systems[i]);
                     systems.RemoveAt(i);
                 }
             }
@@ -133,7 +153,6 @@ namespace btcp.ECS.core
 
                 foreach (ECSSystem system in systems)
                 {
-
                     if (system.UpdatePriority > highestPriority)
                     {
                         highestPriority = system.UpdatePriority;
@@ -145,10 +164,42 @@ namespace btcp.ECS.core
                 m_sortedSystems.Add(highestPriotitySystem);
             }
 
+            foreach (ECSSystem disabledSystem in disabledSystems)
+            {
+                m_systems.Add(disabledSystem);
+            }
+
             for (int i = 0; i < m_sortedSystems.Count; i++)
             {
                 ECSDebug.Log(i + " - " + m_sortedSystems[i]);
             }
+        }
+
+
+        public void EnableSystem<T>() where T : ECSSystem
+        {
+            T system = GetSystem<T>();
+
+            if (system.IsEnabled())
+            {
+                return;
+            }
+
+            system.Enable();
+            SortSystems();
+        }
+
+        public void DisableSystem<T>() where T : ECSSystem
+        {
+            T system = GetSystem<T>();
+
+            if (system.IsEnabled() == false)
+            {
+                return;
+            }
+
+            system.Disable();
+            SortSystems();
         }
     }
 }

@@ -6,7 +6,7 @@ namespace btcp.ECS.core
     public class ECSSystem
     {
         private string SYSTEM_LOG_PREFIX { get { return "[" + GetType().Name.ToString() + "] "; } }
-
+        private bool m_isEnabled = true;
         private ECSQueryManager m_queryManager;
         private ECSEntityManager m_entityManager;
 
@@ -119,6 +119,21 @@ namespace btcp.ECS.core
         protected void Assert(bool condition, object v)
         {
             ECSDebug.Assert(condition, SYSTEM_LOG_PREFIX + v);
+        }
+
+        internal bool IsEnabled()
+        {
+            return m_isEnabled;
+        }
+
+        internal void Enable()
+        {
+            m_isEnabled = true;
+        }
+
+        internal void Disable()
+        {
+            m_isEnabled = false;
         }
     }
 }
