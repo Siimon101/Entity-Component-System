@@ -20,7 +20,13 @@ namespace btcp.ECS.examples.unity.common.systems
                 if (HasComponent<CRigidbody>(eID))
                 {
                     CRigidbody cRigidbody = GetComponent<CRigidbody>(eID);
+                    if(cRigidbody.RigidBody.isKinematic == false)
+                    {
                     cRigidbody.RigidBody.AddForce(cMovement.VelocityX, cMovement.VelocityY, cMovement.VelocityZ, ForceMode.VelocityChange);
+                    }else{
+                        Vector3 newPos = cRigidbody.RigidBody.position + new Vector3(cMovement.VelocityX, cMovement.VelocityY, cMovement.VelocityZ);
+                        cRigidbody.RigidBody.MovePosition(newPos);
+                    }
                 }
                 else
                 {

@@ -1,4 +1,5 @@
-﻿using btcp.ECS.interfaces;
+﻿using System;
+using btcp.ECS.interfaces;
 
 namespace btcp.ECS.core
 {
@@ -47,6 +48,12 @@ namespace btcp.ECS.core
         internal void LateUpdate()
         {
             m_systemManager.LateUpdate();
+        }
+
+        internal void Kill()
+        {
+            m_entityManager.Kill();
+            m_systemManager.Kill();
         }
     }
 }

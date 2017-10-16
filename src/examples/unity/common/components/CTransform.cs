@@ -25,6 +25,11 @@ namespace btcp.ECS.examples.unity.common.components
 
         }
 
+        public CTransform(GameObject gameObject)
+        {
+            this.GameObject = gameObject;
+        }
+
         public CTransform(string name, float x, float y, float z) : this(x, y, z)
         {
             Name = name;

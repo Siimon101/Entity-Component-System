@@ -6,5 +6,6 @@ namespace btcp.ECS.examples.unity.common.components
     public class CRigidbody : ECSComponent
     {
         public Rigidbody RigidBody;
+
     }
 }

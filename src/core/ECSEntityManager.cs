@@ -17,6 +17,7 @@ namespace btcp.ECS.core
         private Bag<ECSEntity> m_entityBag;
 
         private IECSEntityFactory m_entityFactory;
+        internal static readonly int NULL_ENTITY = -1;
 
         public ECSEntityManager()
         {
@@ -53,6 +54,17 @@ namespace btcp.ECS.core
             return e;
         }
 
+        internal void Kill()
+        {
+            foreach(ECSEntity entity in m_entityBag.GetAll())
+            {
+                if(entity != null)
+                {
+                    DestroyEntity(entity.EntityID);
+                }
+            }
+        }
+
         ///<summary> Creates and adds <see cref="ECSEntity"/> to ECS </summary>
         internal ECSEntity CreateEntity(string archetype)
         {
@@ -69,6 +81,12 @@ namespace btcp.ECS.core
         public void DestroyEntity(int entityID)
         {
             ECSEntity entity = m_entityBag.Get(entityID);
+
+            if(entity == null)
+            {
+                ECSDebug.LogWarning("Tried to destroy entity " + entityID + " but is already destroyed");
+                return;
+            }
 
             if (OnEntityDestroyedPre != null)
             {

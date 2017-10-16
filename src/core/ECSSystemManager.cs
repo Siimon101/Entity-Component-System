@@ -57,6 +57,13 @@ namespace btcp.ECS.core
             SortSystems();
         }
 
+        internal void Kill()
+        {
+            m_systems.Clear();
+            m_systemIdentifiers.Clear();
+            m_sortedSystems.Clear();
+        }
+
         internal void SetSystemPriority<T>(int v) where T : ECSSystem
         {
             GetSystem<T>().UpdatePriority = v;
@@ -166,7 +173,7 @@ namespace btcp.ECS.core
 
             foreach (ECSSystem disabledSystem in disabledSystems)
             {
-                m_systems.Add(disabledSystem);
+                m_sortedSystems.Add(disabledSystem);
             }
 
             for (int i = 0; i < m_sortedSystems.Count; i++)

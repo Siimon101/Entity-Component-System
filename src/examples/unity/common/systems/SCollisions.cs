@@ -30,7 +30,10 @@ namespace btcp.ECS.examples.unity.common.systems
 
         public override void OnEntityDestroyedPre(ECSEntity entity)
         {
-            RemoveEntity(entity.EntityID);
+            if (HasComponent<CCollider>(entity.EntityID))
+            {
+                RemoveEntity(entity.EntityID);
+            }
         }
 
         private void AddEntity(int entityID)

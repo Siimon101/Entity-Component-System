@@ -9,13 +9,14 @@ namespace btcp.ECS.utils
         public enum DebugLevel
         {
             None,
+            Assertions,
             Errors,
             Warnings,
             All
         }
 
 
-        private static DebugLevel m_debugLevel = DebugLevel.Warnings;
+        private static DebugLevel m_debugLevel = DebugLevel.None;
         private const string DEBUG_PREFIX = "[ECSDebug] ";
 
         public static void Log(object v)
@@ -53,6 +54,11 @@ namespace btcp.ECS.utils
 
         internal static void Assert(bool condition, object v)
         {
+            if (m_debugLevel < DebugLevel.Assertions)
+            {
+                return;
+            }
+
             v = DEBUG_PREFIX + v;
             Debug.Assert(condition, v);
         }
