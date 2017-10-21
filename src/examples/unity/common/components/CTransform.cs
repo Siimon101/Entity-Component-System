@@ -12,6 +12,10 @@ namespace btcp.ECS.examples.unity.common.components
         public float RotationY = float.NaN;
         public float RotationZ = float.NaN;
 
+        public float ScaleX = 1;
+        public float ScaleY = 1;
+        public float ScaleZ = 1;
+
         public string Name;
         public GameObject GameObject;
 

@@ -25,8 +25,14 @@ namespace btcp.ECS.examples.unity.common.systems
                 rot.y = cTransform.RotationY;
                 rot.z = cTransform.RotationZ;
 
+                Vector3 scale = Vector3.one;
+                scale.x = cTransform.ScaleX;
+                scale.y = cTransform.ScaleY;
+                scale.z = cTransform.ScaleZ;
+
                 cTransform.GameObject.transform.position = (pos);
                 cTransform.GameObject.transform.eulerAngles = (rot);
+                cTransform.GameObject.transform.localScale = scale;
             }
         }
 

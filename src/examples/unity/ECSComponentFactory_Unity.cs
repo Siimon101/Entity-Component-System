@@ -127,7 +127,7 @@ namespace btcp.ECS.examples.unity
                 {
                     cBoxCollider.BoxCollider = AddOrGetUnityComponent<BoxCollider>(cTransform);
                 }
-                
+
                 OnColliderAdded(cBoxCollider.BoxCollider, entityID);
             }
 
@@ -220,11 +220,13 @@ namespace btcp.ECS.examples.unity
                 {
                     meshRenderer.MeshFilter = AddOrGetUnityComponent<MeshFilter>(cTransform);
 
-                    if (meshRenderer.MeshID != null && (meshRenderer.MeshFilter.mesh == null || meshRenderer.MeshFilter.mesh.name != meshRenderer.MeshID))
+                    if (meshRenderer.MeshID != null && (meshRenderer.MeshFilter.mesh.name != meshRenderer.MeshID || meshRenderer.MeshFilter.mesh == null))
                     {
                         Mesh mesh = Resources.Load<Mesh>(meshRenderer.MeshID);
                         meshRenderer.MeshFilter.mesh = mesh;
                     }
+
+                    meshRenderer.MeshID = meshRenderer.MeshFilter.mesh.name;
                 }
             }
 

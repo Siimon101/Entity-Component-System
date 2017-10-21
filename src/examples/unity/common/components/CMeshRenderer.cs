@@ -7,10 +7,10 @@ namespace btcp.ECS.examples.unity.common.components
     {
 
         public MeshRenderer MeshRenderer;
-        public string MaterialID;
+        public string MaterialID = null;
 
         public MeshFilter MeshFilter;
-        public string MeshID;
+        public string MeshID = null;
 
 
     }
