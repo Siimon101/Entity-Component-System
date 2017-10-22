@@ -8,7 +8,7 @@ namespace btcp.ECS.utils
 {
     public class Bag<T> : IEnumerable, IDebuggable
     {
-
+        public T NULL_VALUE = default(T);
         private T[] m_data;
         protected int m_size = 0;
 
@@ -224,7 +224,7 @@ namespace btcp.ECS.utils
 
             for (int i = 0; i < m_size; i++)
             {
-                if (m_data[i] != null && m_data[i].Equals(default(T)) == false)
+                if (m_data[i] != null && m_data[i].Equals(NULL_VALUE) == false)
                 {
                     validItems.Add(m_data[i]);
                 }

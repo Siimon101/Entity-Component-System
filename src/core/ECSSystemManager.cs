@@ -20,6 +20,7 @@ namespace btcp.ECS.core
         {
             m_systemIdentifiers = new List<Type>();
             m_systems = new Bag<ECSSystem>();
+            m_sortedSystems = new List<ECSSystem>();
         }
 
         public void Initialize(ECSQueryManager queryManager, ECSEntityManager entityManager, ECSComponentManager componentManager)

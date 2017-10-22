@@ -16,7 +16,7 @@ namespace btcp.ECS.utils
         }
 
 
-        private static DebugLevel m_debugLevel = DebugLevel.None;
+        private static DebugLevel m_debugLevel = DebugLevel.Warnings;
         private const string DEBUG_PREFIX = "[ECSDebug] ";
 
         public static void Log(object v)

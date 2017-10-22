@@ -12,9 +12,9 @@ namespace btcp.ECS.examples.unity.common.components
         public float RotationY = float.NaN;
         public float RotationZ = float.NaN;
 
-        public float ScaleX = 1;
-        public float ScaleY = 1;
-        public float ScaleZ = 1;
+        public float ScaleX = float.NaN;
+        public float ScaleY = float.NaN;
+        public float ScaleZ = float.NaN;
 
         public string Name;
         public GameObject GameObject;
@@ -23,6 +23,10 @@ namespace btcp.ECS.examples.unity.common.components
 
         ///The path of the prefab (must be located in Resources folder)
         public string PrefabID;
+
+        public Vector3 Position3 { get { return new Vector3(X, Y, Z); } }
+        public Vector3 Rotation3 { get { return new Vector3(RotationX, RotationY, RotationZ); } }
+        public Vector3 Scale3 { get { return new Vector3(ScaleX, ScaleY, ScaleZ); } }
 
         public CTransform()
         {
@@ -57,5 +61,5 @@ namespace btcp.ECS.examples.unity.common.components
         {
             this.Name = name;
         }
-}
+    }
 }

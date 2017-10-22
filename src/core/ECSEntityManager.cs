@@ -34,7 +34,7 @@ namespace btcp.ECS.core
         ///<summary> Adds <see cref="ECSEntity"/> to ECS </summary>
         public ECSEntity AddEntity(ECSEntity entity)
         {
-            int entityID = m_entityBag.GetSize() + 1;
+            int entityID = m_entityBag.GetSize();
             m_entityBag.Set(entityID, entity);
             entity.EntityID = entityID;
 

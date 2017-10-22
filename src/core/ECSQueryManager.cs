@@ -73,6 +73,7 @@ namespace btcp.ECS.core
         {
             ECSDebug.Log("Created query with args " + args.Length);
             m_queries[args] = new Bag<int>();
+            m_queries[args].NULL_VALUE = -1;
             RefreshQuery(args);
             return m_queries[args].GetAll().Clone() as int[];
         }

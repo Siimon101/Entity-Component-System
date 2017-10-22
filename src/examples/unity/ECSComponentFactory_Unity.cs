@@ -83,6 +83,21 @@ namespace btcp.ECS.examples.unity
                 {
                     cTransform.RotationZ = cTransform.GameObject.transform.eulerAngles.z;
                 }
+
+                if (cTransform.ScaleX.Equals(float.NaN))
+                {
+                    cTransform.ScaleX = cTransform.GameObject.transform.localScale.x;
+                }
+
+                if (cTransform.ScaleY.Equals(float.NaN))
+                {
+                    cTransform.ScaleY = cTransform.GameObject.transform.localScale.y;
+                }
+
+                if (cTransform.ScaleZ.Equals(float.NaN))
+                {
+                    cTransform.ScaleZ = cTransform.GameObject.transform.localScale.z;
+                }
             }
 
             if (component.GetType() == typeof(CSpriteRenderer))
@@ -110,7 +125,14 @@ namespace btcp.ECS.examples.unity
                     return 1;
                 }
 
+                bool overwriteValues = (cTransform.GameObject.GetComponent<Rigidbody>() != null);
                 cRigidbody.RigidBody = AddOrGetUnityComponent<Rigidbody>(cTransform);
+
+                if (overwriteValues)
+                {
+                    cRigidbody.IsKinematic = cRigidbody.RigidBody.isKinematic;
+                    cRigidbody.UseGravity = cRigidbody.RigidBody.useGravity;
+                }
             }
 
             if (component.GetType() == typeof(CBoxCollider))
@@ -239,13 +261,11 @@ namespace btcp.ECS.examples.unity
             {
                 CCollider newCollider = new CCollider();
                 newCollider.Collider = unityCollider;
-                unityCollider.gameObject.AddComponent<CollisionNotifier>();
                 m_componentManager.AddComponent(entityID, newCollider);
             }
         }
         private void OnColliderRemoved(int entityID, Collider unityCollider)
         {
-            GameObject.Destroy(unityCollider.GetComponent<CollisionNotifier>());
         }
 
 

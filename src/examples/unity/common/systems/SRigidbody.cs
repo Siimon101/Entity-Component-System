@@ -27,6 +27,17 @@ namespace btcp.ECS.examples.unity.common.systems
                 cTransform.RotationX = rot.x;
                 cTransform.RotationY = rot.y;
                 cTransform.RotationZ = rot.z;
+
+                if (cRigidbody.RigidBody.useGravity != cRigidbody.UseGravity)
+                {
+                    cRigidbody.RigidBody.useGravity = cRigidbody.UseGravity;
+                }
+                
+                if (cRigidbody.RigidBody.isKinematic != cRigidbody.IsKinematic)
+                {
+                    cRigidbody.RigidBody.isKinematic = cRigidbody.IsKinematic;
+                }
+
             }
         }
 

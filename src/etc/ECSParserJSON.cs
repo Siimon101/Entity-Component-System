@@ -88,7 +88,7 @@ namespace btcp.ECS.etc
                     }
                 }
 
-                ECSDebug.Assert(m_componentClasses.ContainsKey(componentName), "Could not find Component " + componentName);
+                ECSDebug.Assert(m_componentClasses.ContainsKey(componentName), "Tried to cache type " + componentName + " but could not find it. Does it exist?");
             }
 
             return returnedTypes;

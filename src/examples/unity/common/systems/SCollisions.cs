@@ -39,7 +39,18 @@ namespace btcp.ECS.examples.unity.common.systems
         private void AddEntity(int entityID)
         {
             CCollider cCollider = GetComponent<CCollider>(entityID);
+
+            if(cCollider.Collider == null)
+            {
+                return;
+            }
+            
             CollisionNotifier notifier = cCollider.Collider.GetComponent<CollisionNotifier>();
+
+            if (notifier == null)
+            {
+                notifier = cCollider.Collider.gameObject.AddComponent<CollisionNotifier>();
+            }
 
             if (m_collisioNotifiers.Has(notifier) == -1)
             {
@@ -60,6 +71,7 @@ namespace btcp.ECS.examples.unity.common.systems
                 m_collisioNotifiers.Set(entityID, null);
                 notifier.OnCollisionBegin -= OnCollisionBegin;
                 notifier.OnCollisionEnd -= OnCollisionEnd;
+                GameObject.Destroy(notifier);
             }
         }
 
